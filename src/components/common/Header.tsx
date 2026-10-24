@@ -179,7 +179,7 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
 
             {showNotifDropdown && (
-              <div className="absolute right-0 mt-3 w-80 sm:w-96 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-amber-200/60 p-4 z-50 animate-fadeIn">
+              <div className="absolute right-0 mt-3 w-[calc(100vw-2rem)] sm:w-96 max-w-sm bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-amber-200/60 p-4 z-50 animate-fadeIn">
                 <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-amber-500" />
@@ -236,7 +236,7 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
 
             {showUserDropdown && (
-              <div className="absolute right-0 mt-3 w-68 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-amber-200/70 py-2.5 z-50 animate-fadeIn">
+              <div className="absolute right-0 mt-3 w-[calc(100vw-2rem)] sm:w-68 max-w-xs bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-amber-200/70 py-2.5 z-50 animate-fadeIn">
                 <div className="px-4 py-3 border-b border-slate-100 mb-1">
                   <div className="font-extrabold text-xs text-slate-900 font-display">{currentUser.name}</div>
                   <div className="text-[11px] font-mono text-indigo-700 font-bold">@{currentUser.username}</div>

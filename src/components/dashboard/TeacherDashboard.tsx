@@ -10,7 +10,9 @@ import {
   ChevronRight,
   Sparkles,
   Camera,
-  Crown
+  Crown,
+  Search,
+  X
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useSchoolData } from '../../context/SchoolDataContext';
@@ -33,13 +35,43 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ setActiveMod
 
   const userName = currentUser?.name || 'Guru';
   const myStudents = students.filter(s => s.enrolledPrograms.includes(teacherProgram as ProgramType));
-  const myTasks = tasks.filter(t => t.teacherName.toLowerCase().includes(userName.split(' ')[0].toLowerCase()) || t.program === teacherProgram);
+  
+  // Search & Date filters for teacher's dashboard tasks
+  const [taskSearchQuery, setTaskSearchQuery] = useState('');
+  const [taskFilterDate, setTaskFilterDate] = useState('');
+
+  const myTasks = tasks.filter(t => {
+    const isMine = t.teacherName.toLowerCase().includes(userName.split(' ')[0].toLowerCase()) || t.program === teacherProgram;
+    if (!isMine) return false;
+
+    if (taskSearchQuery.trim()) {
+      const q = taskSearchQuery.toLowerCase();
+      const matchStd = t.studentName ? t.studentName.toLowerCase().includes(q) : false;
+      const matchTitle = t.title.toLowerCase().includes(q);
+      if (!matchStd && !matchTitle) return false;
+    }
+
+    if (taskFilterDate) {
+      if (t.deadline !== taskFilterDate && t.submissionDate !== taskFilterDate) return false;
+    }
+
+    return true;
+  });
 
   // Form states for quick assessment entry
   const [showQuickAssessment, setShowQuickAssessment] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(myStudents[0]?.id || '');
   const [activityNote, setActivityNote] = useState('');
   const [isSuccessToast, setIsSuccessToast] = useState(false);
+
+  const roleNameMap: Record<string, string> = {
+    guru_sekolah_pagi: 'Guru Sekolah Pagi',
+    terapis: 'Terapis Wicara & Sensori Integrasi',
+    shadow_teacher: 'Guru Shadow (Pendamping Khusus)',
+    daycare_teacher: 'Guru & Pengasuh DayCare'
+  };
+
+  const currentRoleName = roleNameMap[userRole] || 'Tenaga Pendidik Little Star';
 
   const handleSaveDailyTask = (e: React.FormEvent) => {
     e.preventDefault();
@@ -235,6 +267,64 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ setActiveMod
             </div>
           </form>
         )}
+
+        {/* Obligation Notice & Search Controls */}
+        <div className="pt-2 pb-4 space-y-3">
+          <div className="p-3 bg-amber-50 rounded-2xl border border-amber-200/90 text-xs text-amber-900 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
+              <span>
+                <strong>Peran Anda: {currentRoleName}</strong>. Seluruh pengajar wajib mengisi penilaian harian & evaluasi berkala siswa binaan.
+              </span>
+            </div>
+            <button
+              onClick={() => setActiveModule('tasks')}
+              className="text-[11px] font-bold text-blue-700 hover:underline shrink-0 cursor-pointer"
+            >
+              Buka Modul Tugas Penuh →
+            </button>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center justify-between">
+            <div className="relative flex-1">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Cari tugas / nama siswa binaan..."
+                value={taskSearchQuery}
+                onChange={(e) => setTaskSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50/50"
+              />
+              {taskSearchQuery && (
+                <button
+                  onClick={() => setTaskSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={taskFilterDate}
+                onChange={(e) => setTaskFilterDate(e.target.value)}
+                className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 bg-slate-50/50 cursor-pointer"
+                title="Filter berdasarkan tanggal tugas"
+              />
+              {taskFilterDate && (
+                <button
+                  onClick={() => setTaskFilterDate('')}
+                  className="p-1.5 text-xs text-rose-600 hover:bg-rose-50 rounded-lg border border-rose-200 cursor-pointer"
+                  title="Reset tanggal"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
 
         {/* Task list for this teacher */}
         <div className="space-y-3">

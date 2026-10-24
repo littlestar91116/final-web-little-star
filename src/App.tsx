@@ -37,6 +37,7 @@ import { GalleryLandingPage } from './components/landing/GalleryLandingPage';
 import { LoginModal } from './components/auth/LoginModal';
 import { SettingsModule } from './components/modules/SettingsModule';
 import { SiteSettingsProvider } from './context/SiteSettingsContext';
+import { LogoIntroBackground } from './components/common/LogoIntroBackground';
 
 const MainLayout: React.FC = () => {
   const { currentUser, isAuthenticated } = useAuth();
@@ -232,8 +233,8 @@ const MainLayout: React.FC = () => {
           onOpenSupabaseModal={() => setSupabaseModalOpen(true)}
         />
 
-        {/* Main Content Viewport with Motion Transitions */}
-        <main className="flex-1 p-4 lg:p-8 lg:ml-72 pb-24 lg:pb-12 max-w-full overflow-hidden">
+        {/* Main Content Viewport with Motion Transitions - Responsive for Phone & Laptop */}
+        <main className="flex-1 p-3 sm:p-5 lg:p-8 lg:ml-72 pb-28 lg:pb-12 max-w-full overflow-x-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeModule}
@@ -268,6 +269,7 @@ export default function App() {
     <AuthProvider>
       <SchoolDataProvider>
         <SiteSettingsProvider>
+          <LogoIntroBackground />
           <MainLayout />
         </SiteSettingsProvider>
       </SchoolDataProvider>

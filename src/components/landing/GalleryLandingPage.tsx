@@ -24,12 +24,20 @@ import {
   UserPlus,
   Sliders,
   Megaphone,
-  ShieldAlert
+  ShieldAlert,
+  Sun,
+  HeartHandshake,
+  Clock,
+  BookOpen,
+  Star,
+  ArrowRight,
+  UserCheck,
+  Menu
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useSchoolData } from '../../context/SchoolDataContext';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
-import { GalleryItem, ProgramType } from '../../types';
+import { GalleryItem, ProgramType, SchoolProgramDetail } from '../../types';
 import { Logo } from '../common/Logo';
 import { AdmissionRegistrationModal } from './AdmissionRegistrationModal';
 
@@ -47,7 +55,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
   onOpenSettings
 }) => {
   const { currentUser, isAuthenticated } = useAuth();
-  const { gallery, addGalleryItem, deleteGalleryItem, toggleTakeDownGalleryItem } = useSchoolData();
+  const { gallery, addGalleryItem, deleteGalleryItem, toggleTakeDownGalleryItem, detailedPrograms } = useSchoolData();
   const { settings, getWhatsAppUrl } = useSiteSettings();
 
   const isSuperAdmin = currentUser?.role === 'super_admin';
@@ -62,7 +70,9 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
   const [selectedMediaItem, setSelectedMediaItem] = useState<GalleryItem | null>(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showAdmissionModal, setShowAdmissionModal] = useState(false);
+  const [selectedAdmissionProg, setSelectedAdmissionProg] = useState<ProgramType | undefined>(undefined);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // New Media Form State
   const [newTitle, setNewTitle] = useState('');
@@ -72,6 +82,28 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
   const [newCategory, setNewCategory] = useState<'kegiatan' | 'prestasi' | 'terapi' | 'outing' | 'projek'>('kegiatan');
   const [newDescription, setNewDescription] = useState('');
   const [newIsPublic, setNewIsPublic] = useState(true);
+
+  const getProgramIcon = (iconName?: string) => {
+    switch (iconName) {
+      case 'HeartHandshake': return HeartHandshake;
+      case 'Sparkles': return Sparkles;
+      case 'UserCheck': return UserCheck;
+      default: return Sun;
+    }
+  };
+
+  const handleOpenAdmissionWithProg = (progCode: string) => {
+    const pCode = (['sekolah_pagi', 'terapi', 'daycare', 'shadow'].includes(progCode) 
+      ? progCode 
+      : 'sekolah_pagi') as ProgramType;
+    setSelectedAdmissionProg(pCode);
+    setShowAdmissionModal(true);
+  };
+
+  const getWhatsAppProgUrl = (progTitle: string) => {
+    const text = `Assalamu’alaikum warahmatullahi wabarakatuh. Selamat pagi Mr/Mrs Little Star. Saya ingin menanyakan informasi pendaftaran dan konsultasi untuk *${progTitle}*. Mohon informasi dan arahannya. Terima kasih.`;
+    return getWhatsAppUrl(text);
+  };
 
   const showNotification = (msg: string) => {
     setToastMessage(msg);
@@ -160,38 +192,57 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
         </div>
       )}
 
-      {/* Top Navbar */}
-      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-amber-200/70 px-4 lg:px-8 py-3.5 transition-all shadow-xs">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      {/* Top Navbar - Responsive for Mobile & Desktop */}
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-amber-200/70 px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3.5 transition-all shadow-xs">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
           {/* Logo & School Name */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <Logo size="md" showText={true} />
           </div>
 
+          {/* Quick Nav Links on Desktop / Laptop */}
+          <nav className="hidden lg:flex items-center gap-4 text-xs font-bold text-slate-700">
+            <a 
+              href="#program-sekolah" 
+              className="px-3 py-1.5 rounded-xl hover:bg-amber-100/60 hover:text-amber-900 transition-colors flex items-center gap-1.5"
+            >
+              <BookOpen className="w-3.5 h-3.5 text-amber-600" />
+              <span>Program Sekolah</span>
+            </a>
+            <a 
+              href="#galeri-sekolah" 
+              className="px-3 py-1.5 rounded-xl hover:bg-blue-100/60 hover:text-blue-900 transition-colors flex items-center gap-1.5"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+              <span>Galeri Dokumentasi</span>
+            </a>
+          </nav>
+
           {/* Right Action Buttons */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             {/* Online Admission Registration Button */}
             {settings.showHeroAdmissionBtn && (
               <motion.button
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.96 }}
                 onClick={() => setShowAdmissionModal(true)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-500 hover:to-yellow-500 text-slate-950 text-xs font-black shadow-md shadow-amber-400/25 cursor-pointer uppercase tracking-wider shimmer-badge"
+                className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-500 hover:to-yellow-500 text-slate-950 text-[10px] sm:text-xs font-black shadow-md shadow-amber-400/25 cursor-pointer uppercase tracking-wider shimmer-badge"
               >
-                <UserPlus className="w-3.5 h-3.5 text-slate-950" />
-                <span>Daftar Siswa (PSB)</span>
+                <UserPlus className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-slate-950" />
+                <span className="hidden sm:inline">Daftar Siswa (PSB)</span>
+                <span className="sm:hidden">PSB</span>
               </motion.button>
             )}
 
-            {/* WhatsApp Consultation Link */}
+            {/* WhatsApp Consultation Link (Tablet & Desktop) */}
             <a
               href={dynamicWhatsAppUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden sm:inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs font-bold transition-all shadow-xs hover:scale-105 active:scale-95"
+              className="hidden md:inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs font-bold transition-all shadow-xs hover:scale-105 active:scale-95"
             >
               <MessageCircle className="w-4 h-4 text-emerald-600" />
-              <span>Tanya WhatsApp</span>
+              <span>Tanya WA</span>
             </a>
 
             {/* Login / Dashboard Button */}
@@ -200,24 +251,83 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.96 }}
                 onClick={onEnterDashboard}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-black shadow-lg shadow-blue-500/25 cursor-pointer uppercase tracking-wider"
+                className="inline-flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-700 text-white text-[10px] sm:text-xs font-black shadow-lg shadow-blue-500/25 cursor-pointer uppercase tracking-wider"
               >
-                <span>Masuk Dashboard</span>
-                <ChevronRight className="w-4 h-4" />
+                <span className="hidden sm:inline">Masuk Dashboard</span>
+                <span className="sm:hidden">Dashboard</span>
+                <ChevronRight className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
               </motion.button>
             ) : (
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onOpenLogin}
-                className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-500 hover:to-yellow-500 text-slate-950 text-xs font-black shadow-lg shadow-amber-400/30 cursor-pointer uppercase tracking-wider shimmer-badge"
+                className="inline-flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-500 hover:to-yellow-500 text-slate-950 text-[10px] sm:text-xs font-black shadow-lg shadow-amber-400/30 cursor-pointer uppercase tracking-wider shimmer-badge"
               >
-                <LogIn className="w-4 h-4 text-slate-950" />
-                <span>Masuk ke Sistem</span>
+                <LogIn className="w-3 sm:w-4 h-3 sm:h-4 text-slate-950" />
+                <span className="hidden sm:inline">Masuk ke Sistem</span>
+                <span className="sm:hidden">Masuk</span>
               </motion.button>
             )}
+
+            {/* Mobile Menu Hamburger Toggle */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-1.5 sm:p-2 rounded-xl text-slate-700 hover:text-amber-600 hover:bg-amber-50/70 border border-slate-200/80 transition-all cursor-pointer"
+              aria-label="Toggle Navigation Menu"
+            >
+              {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Dropdown Drawer Menu */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="lg:hidden mt-2 pt-2 border-t border-amber-200/60 space-y-1.5 overflow-hidden"
+            >
+              <a 
+                href="#program-sekolah" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-3 py-2 rounded-xl bg-amber-50/70 hover:bg-amber-100 text-slate-800 text-xs font-bold flex items-center justify-between"
+              >
+                <span className="flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-amber-600" />
+                  <span>Program Sekolah (4 Pilar)</span>
+                </span>
+                <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+              </a>
+              <a 
+                href="#galeri-sekolah" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-3 py-2 rounded-xl bg-blue-50/70 hover:bg-blue-100 text-slate-800 text-xs font-bold flex items-center justify-between"
+              >
+                <span className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-blue-600" />
+                  <span>Galeri Dokumentasi & Video</span>
+                </span>
+                <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+              </a>
+              <a 
+                href={dynamicWhatsAppUrl} 
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 text-xs font-bold flex items-center justify-between"
+              >
+                <span className="flex items-center gap-2">
+                  <MessageCircle className="w-4 h-4 text-emerald-600" />
+                  <span>Konsultasi WhatsApp Sekolah</span>
+                </span>
+                <ExternalLink className="w-3.5 h-3.5 text-emerald-600" />
+              </a>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       {/* Hero Showcase Section */}
@@ -355,8 +465,140 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
         )}
       </AnimatePresence>
 
+      {/* SECTION PROGRAM SEKOLAH DI HALAMAN AWAL (Sesuai Permintaan User: tambahkan program sekolah di halaman awal) */}
+      <section id="program-sekolah" className="max-w-7xl mx-auto w-full px-4 lg:px-8 pt-4 pb-12 space-y-8">
+        <div className="text-center space-y-2.5 max-w-3xl mx-auto">
+          <motion.div 
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-black bg-gradient-to-r from-blue-100 via-indigo-50 to-blue-100 text-blue-950 border border-blue-200 uppercase tracking-widest shadow-xs"
+          >
+            <BookOpen className="w-3.5 h-3.5 text-blue-600" />
+            <span>Pendidikan & Layanan Terapi Unggulan</span>
+          </motion.div>
+
+          <motion.h2 
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="text-2xl sm:text-3xl lg:text-4xl font-black font-display tracking-tight text-slate-900"
+          >
+            Program Sekolah Little Star Learning Center
+          </motion.h2>
+
+          <motion.p 
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="text-xs sm:text-sm text-slate-600 max-w-2xl mx-auto font-medium leading-relaxed"
+          >
+            Membimbing setiap bintang kecil bersinar sepenuh hatinya. Kami menghadirkan program Sekolah Pagi inklusif, Layanan Terapi terpadu, DayCare edukatif, dan Guru Shadow pendamping kelas.
+          </motion.p>
+        </div>
+
+        {/* 4 Pillars Program Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {detailedPrograms.map((prog, idx) => {
+            const ProgIcon = getProgramIcon(prog.iconName);
+
+            return (
+              <motion.div
+                key={prog.id}
+                initial={{ opacity: 0, y: 25 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.45, delay: idx * 0.1 }}
+                whileHover={{ y: -6 }}
+                className="bg-white/95 backdrop-blur-xl rounded-3xl border border-amber-200/80 p-5 sm:p-6 shadow-md hover:shadow-2xl hover:border-amber-400 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden"
+              >
+                {/* Ambient Top Glow */}
+                <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-bl from-amber-400/10 to-transparent rounded-full blur-xl pointer-events-none" />
+
+                <div>
+                  {/* Icon & Age Badge */}
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <div className={`w-10 h-10 rounded-2xl bg-gradient-to-tr ${prog.badgeColor || 'from-blue-600 to-indigo-600'} text-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform`}>
+                      <ProgIcon className="w-5 h-5" />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-blue-50 text-blue-900 border border-blue-200">
+                      Usia: {prog.ageGroup}
+                    </span>
+                  </div>
+
+                  {/* Title & Short Description */}
+                  <h3 className="text-base font-black text-slate-900 font-display mb-1.5 group-hover:text-blue-700 transition-colors">
+                    {prog.title}
+                  </h3>
+
+                  <div className="text-[11px] text-slate-500 font-semibold flex items-center gap-1 mb-2.5">
+                    <Clock className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                    <span className="line-clamp-1">{prog.schedule}</span>
+                  </div>
+
+                  <p className="text-xs text-slate-600 leading-relaxed mb-4 line-clamp-3">
+                    {prog.shortDesc}
+                  </p>
+
+                  {/* Feature Points */}
+                  <div className="space-y-1.5 mb-4 p-3 rounded-2xl bg-slate-50 border border-slate-100 text-[11px] text-slate-700">
+                    <div className="font-black text-[10px] uppercase tracking-wider text-slate-800 mb-1 flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-amber-500" />
+                      <span>Fasilitas Unggulan:</span>
+                    </div>
+                    {prog.points.slice(0, 3).map((pt, i) => (
+                      <div key={i} className="flex items-start gap-1.5">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0 mt-0.5" />
+                        <span className="line-clamp-1">{pt}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Card Footer: Fee & Action Buttons */}
+                <div className="pt-3 border-t border-slate-100 space-y-2.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-[10px] font-black text-amber-900 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-lg truncate">
+                      ⭐ {prog.spesial}
+                    </span>
+                  </div>
+
+                  {prog.fee && (
+                    <div className="text-xs font-black text-emerald-800 bg-emerald-50/70 border border-emerald-200 px-2.5 py-1 rounded-xl font-display text-center">
+                      Tarif: {prog.fee}
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <button
+                      onClick={() => handleOpenAdmissionWithProg(prog.code)}
+                      className="px-2.5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-500 hover:to-yellow-500 text-slate-950 font-black text-[10px] uppercase tracking-wider shadow-sm flex items-center justify-center gap-1 cursor-pointer transition-transform active:scale-95"
+                    >
+                      <span>Daftar PSB</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+
+                    <a
+                      href={getWhatsAppProgUrl(prog.title)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1 transition-transform active:scale-95 text-center"
+                    >
+                      <MessageCircle className="w-3 h-3 text-emerald-700" />
+                      <span>Tanya WA</span>
+                    </a>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </section>
+
       {/* Filter Tabs & Search Bar */}
-      <section className="max-w-7xl mx-auto w-full px-4 lg:px-8 mb-8 space-y-4">
+      <section id="galeri-sekolah" className="max-w-7xl mx-auto w-full px-4 lg:px-8 mb-8 space-y-4">
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 bg-white/90 backdrop-blur-xl p-3 sm:p-4 rounded-3xl border border-amber-200/80 shadow-md shadow-slate-200/60">
           {/* Media Type Tabs */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
@@ -801,7 +1043,11 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
       {/* Modal: Online Admission Registration */}
       <AdmissionRegistrationModal
         isOpen={showAdmissionModal}
-        onClose={() => setShowAdmissionModal(false)}
+        onClose={() => {
+          setShowAdmissionModal(false);
+          setSelectedAdmissionProg(undefined);
+        }}
+        initialProgram={selectedAdmissionProg}
       />
 
       {/* Bright Elegant School Footer */}

@@ -16,14 +16,14 @@ export const Logo: React.FC<LogoProps> = ({
   variant = 'full'
 }) => {
   const sizeMap = {
-    sm: { img: 'h-8 w-auto', text: 'text-sm', sub: 'text-[9px]', ring: 'p-1', star: 'w-2.5 h-2.5' },
-    md: { img: 'h-11 w-auto', text: 'text-base', sub: 'text-[11px]', ring: 'p-1.5', star: 'w-3 h-3' },
-    lg: { img: 'h-16 w-auto', text: 'text-2xl', sub: 'text-xs', ring: 'p-2', star: 'w-4 h-4' },
-    xl: { img: 'h-24 w-auto', text: 'text-3xl', sub: 'text-sm', ring: 'p-3', star: 'w-5 h-5' }
+    sm: { img: 'h-7 sm:h-8 w-auto', text: 'text-xs sm:text-sm', sub: 'text-[8px] sm:text-[9px]', ring: 'p-1', star: 'w-2 sm:w-2.5 h-2 sm:h-2.5' },
+    md: { img: 'h-8 sm:h-11 w-auto', text: 'text-xs sm:text-base', sub: 'text-[8px] sm:text-[11px]', ring: 'p-1 sm:p-1.5', star: 'w-2.5 sm:w-3 h-2.5 sm:h-3' },
+    lg: { img: 'h-11 sm:h-16 w-auto', text: 'text-lg sm:text-2xl', sub: 'text-[9px] sm:text-xs', ring: 'p-1.5 sm:p-2', star: 'w-3 sm:w-4 h-3 sm:h-4' },
+    xl: { img: 'h-14 sm:h-24 w-auto', text: 'text-xl sm:text-3xl', sub: 'text-[10px] sm:text-sm', ring: 'p-2 sm:p-3', star: 'w-3.5 sm:w-5 h-3.5 sm:h-5' }
   };
 
   const currentSize = sizeMap[size];
-  const defaultLogoPath = '/assets/aistudio/Desain_tanpa_judul_20250712_130635_0000__1__c8a27306.png';
+  const defaultLogoPath = '/assets/logo-little-star.png';
 
   let schoolName = 'LITTLE STAR';
   let schoolUnit = 'LEARNING CENTER';

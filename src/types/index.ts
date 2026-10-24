@@ -48,6 +48,37 @@ export interface ProgramInfo {
   iconName: string;
 }
 
+export interface SchoolClass {
+  id: string;
+  name: string;
+  type: string;
+  program: ProgramType;
+  capacity: number;
+  room: string;
+  description?: string;
+}
+
+export interface JobPosition {
+  id: string;
+  title: string;
+  roleCategory: UserRole;
+  description?: string;
+}
+
+export interface SchoolProgramDetail {
+  id: string;
+  code: ProgramType | string;
+  title: string;
+  shortDesc: string;
+  schedule: string;
+  ageGroup: string;
+  points: string[];
+  spesial: string;
+  fee: string;
+  badgeColor?: string;
+  iconName?: string;
+}
+
 export interface Student {
   id: string;
   nis: string;

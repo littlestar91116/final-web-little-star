@@ -26,11 +26,13 @@ import { Logo } from '../common/Logo';
 interface AdmissionRegistrationModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialProgram?: ProgramType;
 }
 
 export const AdmissionRegistrationModal: React.FC<AdmissionRegistrationModalProps> = ({ 
   isOpen, 
-  onClose 
+  onClose,
+  initialProgram 
 }) => {
   const { addAdmission } = useSchoolData();
   const { settings, getWhatsAppUrl } = useSiteSettings();
@@ -52,7 +54,15 @@ export const AdmissionRegistrationModal: React.FC<AdmissionRegistrationModalProp
   const [parentPhone, setParentPhone] = useState('');
   const [parentEmail, setParentEmail] = useState('');
   const [address, setAddress] = useState('');
-  const [selectedPrograms, setSelectedPrograms] = useState<ProgramType[]>(['sekolah_pagi']);
+  const [selectedPrograms, setSelectedPrograms] = useState<ProgramType[]>(() => {
+    return initialProgram ? [initialProgram] : ['sekolah_pagi'];
+  });
+
+  React.useEffect(() => {
+    if (initialProgram) {
+      setSelectedPrograms([initialProgram]);
+    }
+  }, [initialProgram]);
   const [paymentProofUrl, setPaymentProofUrl] = useState('');
   const [notes, setNotes] = useState('');
 
@@ -202,19 +212,19 @@ export const AdmissionRegistrationModal: React.FC<AdmissionRegistrationModalProp
             <div className="h-2 w-full bg-gradient-to-r from-amber-400 via-rose-500 via-purple-600 via-sky-400 to-emerald-400 shrink-0" />
 
             {/* Modal Header */}
-            <div className="px-6 py-4.5 border-b border-amber-100 flex items-center justify-between bg-gradient-to-r from-amber-50/50 via-white to-blue-50/30 shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-tr from-amber-400 to-yellow-400 text-slate-950 rounded-2xl shadow-sm">
-                  <UserPlus className="w-5 h-5 text-slate-950" />
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-amber-100 flex items-center justify-between bg-gradient-to-r from-amber-50/50 via-white to-blue-50/30 shrink-0">
+              <div className="flex items-center gap-2.5 sm:gap-3">
+                <div className="p-2 bg-gradient-to-tr from-amber-400 to-yellow-400 text-slate-950 rounded-2xl shadow-sm shrink-0">
+                  <UserPlus className="w-4 sm:w-5 h-4 sm:h-5 text-slate-950" />
                 </div>
                 <div>
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-400/20 text-amber-900 border border-amber-300">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <span className="px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-wider bg-amber-400/20 text-amber-900 border border-amber-300">
                       PSB 2026 / 2027
                     </span>
-                    <span className="text-[11px] text-slate-500 font-medium">Pendaftaran Resmi</span>
+                    <span className="text-[10px] sm:text-[11px] text-slate-500 font-medium">Pendaftaran Resmi</span>
                   </div>
-                  <h2 className="text-base sm:text-lg font-black text-slate-900 font-display">
+                  <h2 className="text-sm sm:text-lg font-black text-slate-900 font-display">
                     Pendaftaran Siswa Baru (PSB Online)
                   </h2>
                 </div>
@@ -222,7 +232,7 @@ export const AdmissionRegistrationModal: React.FC<AdmissionRegistrationModalProp
 
               <button
                 onClick={handleResetAndClose}
-                className="p-2 rounded-2xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                className="p-1.5 sm:p-2 rounded-2xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
                 aria-label="Tutup Formulir"
               >
                 <X className="w-5 h-5" />
@@ -230,7 +240,7 @@ export const AdmissionRegistrationModal: React.FC<AdmissionRegistrationModalProp
             </div>
 
             {/* Scrollable Form Body */}
-            <div className="p-6 sm:p-7 overflow-y-auto flex-1 space-y-6">
+            <div className="p-4 sm:p-7 overflow-y-auto flex-1 space-y-5 sm:space-y-6">
               {step === 'form' ? (
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Alert Error */}

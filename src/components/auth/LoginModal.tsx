@@ -69,7 +69,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.94, y: 20 }}
             transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-            className="relative z-10 w-full max-w-md bg-white/95 backdrop-blur-2xl rounded-3xl shadow-2xl shadow-indigo-950/60 border border-amber-300/50 p-6 sm:p-8 overflow-hidden light-sweep-effect"
+            className="relative z-10 w-full max-w-md bg-white/95 backdrop-blur-2xl rounded-3xl shadow-2xl shadow-indigo-950/60 border border-amber-300/50 p-5 sm:p-8 overflow-y-auto max-h-[92vh] light-sweep-effect"
           >
             {/* Top Royal Jewel Line */}
             <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-400 via-rose-500 via-purple-600 to-blue-600" />

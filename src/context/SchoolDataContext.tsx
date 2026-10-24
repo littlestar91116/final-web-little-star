@@ -11,6 +11,9 @@ import {
   GalleryItem, 
   NotificationItem,
   ProgramType,
+  SchoolClass,
+  JobPosition,
+  SchoolProgramDetail,
   ConsultationRequest,
   StudentScheduleItem,
   StudentAttendanceItem
@@ -18,6 +21,9 @@ import {
 import { 
   INITIAL_STUDENTS, 
   INITIAL_STAFF, 
+  INITIAL_CLASSES,
+  INITIAL_POSITIONS,
+  INITIAL_PROGRAM_DETAILS,
   INITIAL_ADMISSIONS, 
   INITIAL_OBSERVATION_SLOTS, 
   INITIAL_TASKS, 
@@ -34,6 +40,9 @@ import {
 interface SchoolDataContextType {
   students: Student[];
   staff: StaffMember[];
+  classes: SchoolClass[];
+  positions: JobPosition[];
+  detailedPrograms: SchoolProgramDetail[];
   admissions: AdmissionApplication[];
   observationSlots: ObservationSlot[];
   tasks: TeacherTask[];
@@ -50,6 +59,26 @@ interface SchoolDataContextType {
   addStudent: (student: Omit<Student, 'id'>) => void;
   updateStudent: (id: string, data: Partial<Student>) => void;
   
+  // Staff Actions
+  addStaff: (member: Omit<StaffMember, 'id'>) => void;
+  updateStaff: (id: string, data: Partial<StaffMember>) => void;
+  deleteStaff: (id: string) => void;
+
+  // Class Actions
+  addClass: (cls: Omit<SchoolClass, 'id'>) => void;
+  updateClass: (id: string, data: Partial<SchoolClass>) => void;
+  deleteClass: (id: string) => void;
+
+  // Position Actions
+  addPosition: (pos: Omit<JobPosition, 'id'>) => void;
+  updatePosition: (id: string, data: Partial<JobPosition>) => void;
+  deletePosition: (id: string) => void;
+
+  // Program Actions
+  addProgram: (prog: Omit<SchoolProgramDetail, 'id'>) => void;
+  updateProgram: (id: string, data: Partial<SchoolProgramDetail>) => void;
+  deleteProgram: (id: string) => void;
+
   // Admission Actions
   addAdmission: (admission: Omit<AdmissionApplication, 'id' | 'applicationNumber' | 'createdAt'>) => string;
   verifyAdmissionPayment: (id: string, isApproved: boolean) => void;
@@ -59,6 +88,8 @@ interface SchoolDataContextType {
 
   // Task Actions
   addTask: (task: Omit<TeacherTask, 'id'>) => void;
+  updateTask: (id: string, data: Partial<TeacherTask>) => void;
+  deleteTask: (id: string) => void;
   updateTaskStatus: (id: string, status: TeacherTask['status'], reviewerNotes?: string) => void;
 
   // Case Actions
@@ -95,7 +126,25 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     return saved ? JSON.parse(saved) : INITIAL_STUDENTS;
   });
 
-  const [staff] = useState<StaffMember[]>(INITIAL_STAFF);
+  const [staff, setStaff] = useState<StaffMember[]>(() => {
+    const saved = localStorage.getItem('ls_staff');
+    return saved ? JSON.parse(saved) : INITIAL_STAFF;
+  });
+
+  const [classes, setClasses] = useState<SchoolClass[]>(() => {
+    const saved = localStorage.getItem('ls_classes');
+    return saved ? JSON.parse(saved) : INITIAL_CLASSES;
+  });
+
+  const [positions, setPositions] = useState<JobPosition[]>(() => {
+    const saved = localStorage.getItem('ls_positions');
+    return saved ? JSON.parse(saved) : INITIAL_POSITIONS;
+  });
+
+  const [detailedPrograms, setDetailedPrograms] = useState<SchoolProgramDetail[]>(() => {
+    const saved = localStorage.getItem('ls_programs');
+    return saved ? JSON.parse(saved) : INITIAL_PROGRAM_DETAILS;
+  });
 
   const [admissions, setAdmissions] = useState<AdmissionApplication[]>(() => {
     const saved = localStorage.getItem('ls_admissions');
@@ -190,8 +239,20 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   }, [sdrRecords]);
 
   useEffect(() => {
-    localStorage.setItem('ls_invoices', JSON.stringify(invoices));
-  }, [invoices]);
+    localStorage.setItem('ls_staff', JSON.stringify(staff));
+  }, [staff]);
+
+  useEffect(() => {
+    localStorage.setItem('ls_classes', JSON.stringify(classes));
+  }, [classes]);
+
+  useEffect(() => {
+    localStorage.setItem('ls_positions', JSON.stringify(positions));
+  }, [positions]);
+
+  useEffect(() => {
+    localStorage.setItem('ls_programs', JSON.stringify(detailedPrograms));
+  }, [detailedPrograms]);
 
   // Student Actions
   const addStudent = (newStd: Omit<Student, 'id'>) => {
@@ -201,6 +262,62 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const updateStudent = (id: string, data: Partial<Student>) => {
     setStudents(prev => prev.map(s => s.id === id ? { ...s, ...data } : s));
+  };
+
+  // Staff Actions
+  const addStaff = (member: Omit<StaffMember, 'id'>) => {
+    const id = `stf-${Date.now().toString().slice(-4)}`;
+    setStaff(prev => [{ ...member, id }, ...prev]);
+  };
+
+  const updateStaff = (id: string, data: Partial<StaffMember>) => {
+    setStaff(prev => prev.map(s => s.id === id ? { ...s, ...data } : s));
+  };
+
+  const deleteStaff = (id: string) => {
+    setStaff(prev => prev.filter(s => s.id !== id));
+  };
+
+  // Class Actions
+  const addClass = (cls: Omit<SchoolClass, 'id'>) => {
+    const id = `cls-${Date.now().toString().slice(-4)}`;
+    setClasses(prev => [...prev, { ...cls, id }]);
+  };
+
+  const updateClass = (id: string, data: Partial<SchoolClass>) => {
+    setClasses(prev => prev.map(c => c.id === id ? { ...c, ...data } : c));
+  };
+
+  const deleteClass = (id: string) => {
+    setClasses(prev => prev.filter(c => c.id !== id));
+  };
+
+  // Position Actions
+  const addPosition = (pos: Omit<JobPosition, 'id'>) => {
+    const id = `pos-${Date.now().toString().slice(-4)}`;
+    setPositions(prev => [...prev, { ...pos, id }]);
+  };
+
+  const updatePosition = (id: string, data: Partial<JobPosition>) => {
+    setPositions(prev => prev.map(p => p.id === id ? { ...p, ...data } : p));
+  };
+
+  const deletePosition = (id: string) => {
+    setPositions(prev => prev.filter(p => p.id !== id));
+  };
+
+  // Program Actions
+  const addProgram = (prog: Omit<SchoolProgramDetail, 'id'>) => {
+    const id = `prog-${Date.now().toString().slice(-4)}`;
+    setDetailedPrograms(prev => [...prev, { ...prog, id }]);
+  };
+
+  const updateProgram = (id: string, data: Partial<SchoolProgramDetail>) => {
+    setDetailedPrograms(prev => prev.map(p => p.id === id ? { ...p, ...data } : p));
+  };
+
+  const deleteProgram = (id: string) => {
+    setDetailedPrograms(prev => prev.filter(p => p.id !== id));
   };
 
   // Admission Actions
@@ -313,6 +430,14 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const addTask = (task: Omit<TeacherTask, 'id'>) => {
     const id = `tsk-${Date.now().toString().slice(-4)}`;
     setTasks(prev => [{ ...task, id }, ...prev]);
+  };
+
+  const updateTask = (id: string, data: Partial<TeacherTask>) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, ...data } : t));
+  };
+
+  const deleteTask = (id: string) => {
+    setTasks(prev => prev.filter(t => t.id !== id));
   };
 
   const updateTaskStatus = (id: string, status: TeacherTask['status'], reviewerNotes?: string) => {
@@ -512,6 +637,9 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     <SchoolDataContext.Provider value={{
       students,
       staff,
+      classes,
+      positions,
+      detailedPrograms,
       admissions,
       observationSlots,
       tasks,
@@ -525,12 +653,26 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       consultations,
       addStudent,
       updateStudent,
+      addStaff,
+      updateStaff,
+      deleteStaff,
+      addClass,
+      updateClass,
+      deleteClass,
+      addPosition,
+      updatePosition,
+      deletePosition,
+      addProgram,
+      updateProgram,
+      deleteProgram,
       addAdmission,
       verifyAdmissionPayment,
       bookObservationSlot,
       createObservationSlot,
       admitStudentFromAdmission,
       addTask,
+      updateTask,
+      deleteTask,
       updateTaskStatus,
       addCase,
       updateCaseStatus,

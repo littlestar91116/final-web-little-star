@@ -8,12 +8,196 @@ import {
   StudentDevelopmentRecord, 
   SPPInvoice, 
   GalleryItem, 
-  NotificationItem,
-  ProgramInfo,
-  ConsultationRequest,
-  StudentScheduleItem,
-  StudentAttendanceItem
+  NotificationItem, 
+  ProgramInfo, 
+  SchoolClass, 
+  JobPosition, 
+  SchoolProgramDetail, 
+  ConsultationRequest, 
+  StudentScheduleItem, 
+  StudentAttendanceItem 
 } from '../types';
+
+export const INITIAL_CLASSES: SchoolClass[] = [
+  {
+    id: 'cls-01',
+    name: 'Bintang Kejora (Kelas A)',
+    type: 'PAUD / TK A',
+    program: 'sekolah_pagi',
+    capacity: 15,
+    room: 'Ruang Bintang 1 (Lantai 1)',
+    description: 'Kelas usia 4-5 tahun fokus pada kemandirian, pra-literasi, sosialisasi, dan regulasi sensori.'
+  },
+  {
+    id: 'cls-02',
+    name: 'Bintang Timur (Playgroup)',
+    type: 'Kelompok Bermain',
+    program: 'sekolah_pagi',
+    capacity: 12,
+    room: 'Ruang Bintang 2 (Lantai 1)',
+    description: 'Kelas usia 3-4 tahun stimulasi sensori bermain, koordinasi motorik, dan pembiasaan adab.'
+  },
+  {
+    id: 'cls-03',
+    name: 'Bintang Kecil (Toddler)',
+    type: 'Toddler Stimulation',
+    program: 'sekolah_pagi',
+    capacity: 10,
+    room: 'Ruang Sensori Toddler (Lantai 1)',
+    description: 'Stimulasi sensori eksplorasi balita usia 1.5 - 3 tahun bersama pendidik dan pengasuh.'
+  },
+  {
+    id: 'cls-04',
+    name: 'Kelas Terapi & Sensori Wicara',
+    type: 'Layanan Terapi Individual',
+    program: 'terapi',
+    capacity: 8,
+    room: 'Sensori Gym & Klinik Terapi (Lantai 2)',
+    description: 'Sesi terapi intensif wicara, sensori integrasi, okupasi, dan modifikasi perilaku ABA.'
+  },
+  {
+    id: 'cls-05',
+    name: 'Little Explorers DayCare',
+    type: 'DayCare Full Day',
+    program: 'daycare',
+    capacity: 20,
+    room: 'DayCare Suites & Ruang Istirahat (Lantai 2)',
+    description: 'Pengasuhan penuh kasih, nutrisi terjadwal, toilet training, tidur siang, dan stimulasi sore.'
+  },
+  {
+    id: 'cls-06',
+    name: 'Kelas Inklusi Shadow',
+    type: 'Pendampingan 1-on-1',
+    program: 'shadow',
+    capacity: 6,
+    room: 'Ruang Kelas Reguler & Resource Room',
+    description: 'Pendampingan khusus 1-on-1 untuk mendukung adaptasi, atensi belajar, dan inklusi anak di kelas.'
+  }
+];
+
+export const INITIAL_POSITIONS: JobPosition[] = [
+  {
+    id: 'pos-01',
+    title: 'Kepala Sekolah & Konsultan Pendidikan',
+    roleCategory: 'kepala_sekolah',
+    description: 'Memimpin kurikulum inklusif, evaluasi SDR, supervisi guru, dan penerimaan murid baru.'
+  },
+  {
+    id: 'pos-02',
+    title: 'Wali Kelas Sekolah Pagi',
+    roleCategory: 'guru_sekolah_pagi',
+    description: 'Mengelola aktivitas harian kelas, RPPH, stimulasi bermain, dan laporan perkembangan anak.'
+  },
+  {
+    id: 'pos-03',
+    title: 'Terapis Wicara & Bahasa (Speech Therapist)',
+    roleCategory: 'terapis',
+    description: 'Menangani speech delay, stimulasi oral motor, artikulasi vokal-konsonan, dan bahasa reseptif-ekspresif.'
+  },
+  {
+    id: 'pos-04',
+    title: 'Terapis Sensori Integrasi & Okupasi',
+    roleCategory: 'terapis',
+    description: 'Stimulasi vestibular, proprioseptif, taktil, motorik halus, dan kemandirian aktivitas harian (ADL).'
+  },
+  {
+    id: 'pos-05',
+    title: 'Guru Pendamping Khusus (Shadow Teacher)',
+    roleCategory: 'shadow_teacher',
+    description: 'Mendampingi anak neurodiverse 1-on-1 di kelas, modulasi emosi, memfasilitasi komunikasi dan fokus.'
+  },
+  {
+    id: 'pos-06',
+    title: 'Pendidik & Pengasuh DayCare (Daycare Educator)',
+    roleCategory: 'daycare_teacher',
+    description: 'Mengasuh, stimulasi tumbuh kembang balita, mengelola jadwal tidur, makan, dan toilet training.'
+  },
+  {
+    id: 'pos-07',
+    title: 'Staff Administrasi & Keuangan SPP',
+    roleCategory: 'staff_keuangan',
+    description: 'Mengelola tagihan SPP, pencatatan pembayaran pendaftaran PSB, dan pembukuan sekolah.'
+  }
+];
+
+export const INITIAL_PROGRAM_DETAILS: SchoolProgramDetail[] = [
+  {
+    id: 'prog-01',
+    code: 'sekolah_pagi',
+    title: 'Program Sekolah Pagi (Early Childhood Education)',
+    shortDesc: 'Kurikulum bermain & belajar holistik untuk mengasah sensorik, kognitif, motorik, dan sosialisasi anak usia dini dalam lingkungan inklusif ramah anak.',
+    schedule: 'Senin - Jumat | 08.00 - 11.30 WIB',
+    ageGroup: '2 - 6 Tahun',
+    points: [
+      'Sensory Play & Eksplorasi Kreatif Harian',
+      'Pra-Literasi, Fonik & Pra-Matematika Menyenangkan',
+      'Pembiasaan Adab, Kemandirian & Sosialisasi Positif',
+      'Rasio Guru-Anak Kecil (1 Guru membina 5 Anak)',
+      'Ruang Kelas Luas, Ber-AC, Berkarpet & Ramah Anak'
+    ],
+    spesial: 'Pendekatan Inklusif ramah neurodiversitas didukung observasi psikolog berkala',
+    fee: 'Rp 1.500.000 / bulan',
+    badgeColor: 'from-blue-600 to-indigo-600',
+    iconName: 'Sun'
+  },
+  {
+    id: 'prog-02',
+    code: 'terapi',
+    title: 'Layanan Terapi Terpadu',
+    shortDesc: 'Terapi Wicara (Speech Therapy), Okupasi, Sensori Integrasi, dan Perilaku (ABA) bersama tim profesional terapis berizin resmi.',
+    schedule: 'Sesi Khusus (Senin - Sabtu | 08.00 - 17.00 WIB)',
+    ageGroup: '1.5 - 12 Tahun',
+    points: [
+      'Terapi Wicara & Artikulasi Oral Motor',
+      'Sensori Integrasi (Vestibular, Taktil & Proprioseptif)',
+      'Terapi Okupasi & Kemandirian Aktivitas Keseharian (ADL)',
+      'Terapi Perilaku (Applied Behavior Analysis / ABA)',
+      'Ruangan Sensori Gym Khusus, Ayunan SI & Trampolin'
+    ],
+    spesial: 'Evaluasi perkembangan bulanan & Rapor SDR (Student Development Record) terintegrasi',
+    fee: 'Rp 250.000 / sesi',
+    badgeColor: 'from-emerald-600 to-teal-600',
+    iconName: 'HeartHandshake'
+  },
+  {
+    id: 'prog-03',
+    code: 'daycare',
+    title: 'DayCare & Pengasuhan Edukatif',
+    shortDesc: 'Pengasuhan penuh kasih sayang, stimulasi nutrisi gizi seimbang, jadwal tidur teratur, toilet training, serta pembiasaan karakter baik.',
+    schedule: 'Senin - Jumat | 07.30 - 17.30 WIB (Full Day)',
+    ageGroup: '1 - 6 Tahun',
+    points: [
+      'Makanan & Snack Sehat Bergizi Terjadwal dari Ahli Gizi',
+      'Tidur Siang Nyaman di Tempat Tidur Bersih Individual',
+      'Stimulasi Tumbuh Kembang Setiap Pagi & Sore',
+      'Toilet Training Terbimbing dengan Sabar dan Ramah',
+      'Laporan Harian (Daily Log) Realtime: Makan, Tidur & BAB/BAK'
+    ],
+    spesial: 'Didampingi tenaga bidan & pengasuh terlatih bersertifikasi kompetensi',
+    fee: 'Rp 2.000.000 / bulan',
+    badgeColor: 'from-amber-500 to-yellow-500',
+    iconName: 'Sparkles'
+  },
+  {
+    id: 'prog-04',
+    code: 'shadow',
+    title: 'Pendampingan Khusus (Shadow Teacher)',
+    shortDesc: 'Pendampingan 1-on-1 di kelas untuk membantu anak dengan kebutuhan khusus beradaptasi, fokus, regulasi emosi, dan mandiri bersosialisasi.',
+    schedule: 'Menyesuaikan Jam Sekolah Anak (Pagi / Sesi Kelas)',
+    ageGroup: '3 - 10 Tahun',
+    points: [
+      'Pendampingan 1 Guru untuk 1 Anak di Dalam Ruang Kelas',
+      'Membantu Regulasi Emosi, Transisi & Fokus Belajar',
+      'Menjembatani Interaksi Sosial dengan Teman Sebaya',
+      'Penyusunan Individualized Education Program (IEP)',
+      'Laporan Perkembangan Harian & Evaluasi Semesteran Bersama Orang Tua'
+    ],
+    spesial: 'Pendidik lulusan Pendidikan Luar Biasa (PLB) & Sarjana Psikologi',
+    fee: 'Rp 3.500.000 / bulan',
+    badgeColor: 'from-indigo-600 to-purple-600',
+    iconName: 'UserCheck'
+  }
+];
 
 export const SCHOOL_PROGRAMS: ProgramInfo[] = [
   {
@@ -448,6 +632,7 @@ export const INITIAL_TASKS: TeacherTask[] = [
     period: 'bulanan',
     deadline: '2026-10-28',
     status: 'draft',
+    submissionDate: '2026-10-24',
     notes: 'Kosa kata baru bertambah 12 kata konsonan b, m, p.'
   },
   {
@@ -475,7 +660,81 @@ export const INITIAL_TASKS: TeacherTask[] = [
     studentName: 'Keenan Alvaro Syarif',
     period: 'enam_bulanan',
     deadline: '2026-11-15',
-    status: 'belum_dikerjakan'
+    status: 'sedang_direview',
+    submissionDate: '2026-10-21',
+    notes: 'Penyusunan target 6 bulanan untuk komunikasi fungsional dan regulasi diri.'
+  },
+  {
+    id: 'tsk-006',
+    title: 'Daily Log DayCare: Catatan Asupan Gizi & Pola Tidur Siang',
+    teacherId: 'stf-005',
+    teacherName: 'Bunda Fitri Melati, A.Md.Keb.',
+    program: 'daycare',
+    studentId: 'std-002',
+    studentName: 'Clara Aurelia Wijaya',
+    period: 'harian',
+    deadline: '2026-10-24',
+    status: 'dikirim',
+    submissionDate: '2026-10-24',
+    notes: 'Clara makan siang habis 1 porsi (nasi tim sup sayur + ayam), tidur siang 1.5 jam pukul 12.30-14.00 WIB. Toilet training lancar 2x BAK mandiri.',
+    mediaCount: 2
+  },
+  {
+    id: 'tsk-007',
+    title: 'Laporan Mingguan Menu Nutrisi & Stimulasi Motorik Toddler Daycare',
+    teacherId: 'stf-005',
+    teacherName: 'Bunda Fitri Melati, A.Md.Keb.',
+    program: 'daycare',
+    studentId: 'std-004',
+    studentName: 'Mikaila Zahra Putri',
+    period: 'mingguan',
+    deadline: '2026-10-25',
+    status: 'disetujui',
+    submissionDate: '2026-10-23',
+    notes: 'Evaluasi mingguan pola tidur dan pengenalan buah potong (pepaya & pisang). Ananda antusias berjemur pagi dan bermain bola warna.',
+    reviewerNotes: 'Menu nutrisi sangat baik dan seimbang. Teruskan pemantauan grafik berat dan tinggi badan.'
+  },
+  {
+    id: 'tsk-008',
+    title: 'Penilaian Harian Sesi Terapi Sensori Integrasi & Ayunan Vestibular',
+    teacherId: 'stf-003',
+    teacherName: 'Kak Rian Prasetya, S.Tr.Kes.',
+    program: 'terapi',
+    studentId: 'std-003',
+    studentName: 'Keenan Alvaro Syarif',
+    period: 'harian',
+    deadline: '2026-10-24',
+    status: 'dikirim',
+    submissionDate: '2026-10-24',
+    notes: 'Sesi sensori gym 45 menit: toleransi ayunan gantung meningkat hingga 10 putaran ritmis tanpa kecemasan. Kontak mata membaik saat diminta instruksi verbal.',
+    mediaCount: 2
+  },
+  {
+    id: 'tsk-009',
+    title: 'Catatan Observasi Harian Pendampingan Kelas Shadow: Interaksi Sosial',
+    teacherId: 'stf-004',
+    teacherName: 'Kak Dita Anggraini, S.Pd.',
+    program: 'shadow',
+    studentId: 'std-003',
+    studentName: 'Keenan Alvaro Syarif',
+    period: 'harian',
+    deadline: '2026-10-24',
+    status: 'dikirim',
+    submissionDate: '2026-10-24',
+    notes: 'Keenan berhasil berbagi mainan balok susun dengan temannya di sentra balok selama 10 menit dengan prompting minimal.'
+  },
+  {
+    id: 'tsk-010',
+    title: 'Laporan Bulanan Stimulasi Tumbuh Kembang Balita Daycare Oktober',
+    teacherId: 'stf-005',
+    teacherName: 'Bunda Fitri Melati, A.Md.Keb.',
+    program: 'daycare',
+    studentId: 'std-004',
+    studentName: 'Mikaila Zahra Putri',
+    period: 'bulanan',
+    deadline: '2026-10-30',
+    status: 'draft',
+    notes: 'Pencapaian motorik kasar Mikha: mampu melompat dua kaki di matras busa dan memakai sandal sendiri.'
   }
 ];
 
