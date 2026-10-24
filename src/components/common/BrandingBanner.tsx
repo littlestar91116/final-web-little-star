@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Sparkles, Calendar, Award, ShieldCheck, Sun, Star, Crown, ChevronRight, Zap } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
+import GlowCursor from './GlowCursor';
 
 export const BrandingBanner: React.FC = () => {
   const { currentUser } = useAuth();
@@ -25,6 +26,16 @@ export const BrandingBanner: React.FC = () => {
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] as const }}
       className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-950 via-indigo-950 to-blue-950 text-white shadow-2xl shadow-indigo-950/25 mb-8 border border-amber-400/35 light-sweep-effect"
     >
+      <GlowCursor
+        color="#f97316"
+        secondaryColor="#3b82f6"
+        intensity={1.3}
+        trailWidth={3}
+        linger={1.4}
+        glow={1.2}
+        clickBurst
+        theme="dark"
+      >
       {/* Animated Floating Luminous Background Orbs */}
       <motion.div 
         animate={{ 
@@ -212,6 +223,7 @@ export const BrandingBanner: React.FC = () => {
           </motion.div>
         </div>
       </div>
+      </GlowCursor>
     </motion.div>
   );
 };

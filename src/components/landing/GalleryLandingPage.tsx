@@ -39,6 +39,7 @@ import { useSchoolData } from '../../context/SchoolDataContext';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
 import { GalleryItem, ProgramType, SchoolProgramDetail } from '../../types';
 import { Logo } from '../common/Logo';
+import GlowCursor from '../common/GlowCursor';
 import { AdmissionRegistrationModal } from './AdmissionRegistrationModal';
 
 export const WHATSAPP_CONSULTATION_URL = "https://wa.me/6282199988769?text=Assalamu’alaikum+warahmatullahi+wabarakatuh.+Selamat+pagi,+Mr/Mrs.+Mohon+izin+menghubungi.+Perkenalkan,+saya+[Nama].+Saya+ingin+menanyakan+informasi+terkait+[keperluan+yang+ingin+ditanyakan]+di+sekolah.+Mohon+informasi+dan+arahannya.+Terima+kasih+atas+waktu+dan+bantuannya.+Wassalamu’alaikum+warahmatullahi+wabarakatuh.";
@@ -398,6 +399,92 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
               <span>Konsultasi WhatsApp Sekolah</span>
             </a>
           )}
+        </motion.div>
+      </section>
+
+      {/* Interactive Starlight Showcase Section powered by React Bits <GlowCursor /> */}
+      <section className="max-w-7xl mx-auto w-full px-4 lg:px-8 py-4 mb-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-blue-950 to-indigo-950 text-white shadow-2xl border border-amber-400/35"
+          style={{ position: 'relative', width: '100%', height: '500px' }}
+        >
+          <GlowCursor
+            color="#f97316"
+            secondaryColor="#3b82f6"
+            intensity={1.3}
+            trailWidth={3}
+            linger={1.4}
+            glow={1.2}
+            clickBurst
+            theme="dark"
+          >
+            <div className="relative z-10 p-6 sm:p-10 lg:p-12 flex flex-col justify-between h-full select-none">
+              {/* Top Hint Bar */}
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-400/15 border border-amber-300/40 text-amber-300 text-xs font-black uppercase tracking-wider backdrop-blur-md">
+                  <Sparkles className="w-4 h-4 text-amber-400 animate-spin" style={{ animationDuration: '6s' }} />
+                  <span>Ruang Eksplorasi Bintang Little Star</span>
+                </div>
+                <div className="flex items-center gap-2 text-[11px] font-semibold text-slate-300 bg-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/15">
+                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+                  <span>Gerakkan Kursor & Klik untuk Letupan Cahaya Bintang ✨</span>
+                </div>
+              </div>
+
+              {/* Center Inspiring Headline & Motto */}
+              <div className="my-auto py-6 text-center max-w-3xl mx-auto space-y-3.5 pointer-events-none">
+                <div className="inline-block text-3xl sm:text-4xl animate-bounce-subtle">
+                  🌟
+                </div>
+                <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black font-display tracking-tight text-white leading-tight drop-shadow-xl">
+                  Setiap Anak Lahir Membawa Cahaya Bintangnya Sendiri
+                </h2>
+                <p className="text-xs sm:text-sm md:text-base text-slate-300 max-w-2xl mx-auto font-medium leading-relaxed drop-shadow-md">
+                  Pusat pembelajaran inklusif, stimulasi sensori terpadu, dan pendampingan kasih sayang profesional untuk ananda istimewa dan reguler.
+                </p>
+              </div>
+
+              {/* Bottom Feature Badges & Action Buttons */}
+              <div className="pt-4 border-t border-white/15 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 text-xs">
+                  <span className="px-3 py-1 rounded-xl bg-amber-400/20 text-amber-300 border border-amber-400/30 font-bold">
+                    ☀️ Sekolah Pagi
+                  </span>
+                  <span className="px-3 py-1 rounded-xl bg-emerald-400/20 text-emerald-300 border border-emerald-400/30 font-bold">
+                    🌿 Layanan Terapi
+                  </span>
+                  <span className="px-3 py-1 rounded-xl bg-rose-400/20 text-rose-300 border border-rose-400/30 font-bold">
+                    🌸 DayCare Edukatif
+                  </span>
+                  <span className="px-3 py-1 rounded-xl bg-cyan-400/20 text-cyan-300 border border-cyan-400/30 font-bold">
+                    💎 Shadow Teacher
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3 shrink-0">
+                  <button
+                    onClick={() => setShowAdmissionModal(true)}
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-500 hover:to-yellow-500 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-400/30 transition-all cursor-pointer hover:scale-105 active:scale-95"
+                  >
+                    Daftar Siswa (PSB)
+                  </button>
+                  <a
+                    href={dynamicWhatsAppUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2.5 rounded-xl bg-emerald-600/80 hover:bg-emerald-600 text-white border border-emerald-400/40 font-bold text-xs uppercase tracking-wider transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5"
+                  >
+                    <MessageCircle className="w-4 h-4 text-emerald-200" />
+                    <span>Konsultasi WA</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </GlowCursor>
         </motion.div>
       </section>
 
