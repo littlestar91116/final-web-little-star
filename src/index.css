@@ -173,7 +173,7 @@
     transparent 100%
   );
   animation: light-sweep 6s infinite ease-in-out;
-  pointer-events-none;
+  pointer-events: none;
 }
 
 /* Bell Jingle Animation for Notifications */
