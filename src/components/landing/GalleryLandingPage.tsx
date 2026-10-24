@@ -132,18 +132,21 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
   });
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-amber-400 selection:text-amber-950 relative overflow-x-hidden">
-      {/* Dynamic Ambient Background Lights */}
-      <div className="fixed -top-40 -right-40 w-160 h-160 bg-gradient-to-bl from-amber-500/15 via-rose-500/5 to-transparent rounded-full blur-3xl pointer-events-none -z-10 animate-float-slow" />
-      <div className="fixed -bottom-40 -left-40 w-160 h-160 bg-gradient-to-tr from-blue-600/15 via-indigo-600/10 to-transparent rounded-full blur-3xl pointer-events-none -z-10 animate-float-reverse" />
-      <div className="fixed top-1/3 left-1/2 -translate-x-1/2 w-180 h-180 bg-purple-600/5 rounded-full blur-3xl pointer-events-none -z-10" />
+    <div className="min-h-screen bg-gradient-to-b from-amber-50/70 via-sky-50/40 via-white to-amber-50/60 text-slate-800 flex flex-col font-sans selection:bg-amber-400 selection:text-amber-950 relative overflow-x-hidden">
+      {/* Dynamic Ambient Background Lights - Bright & Cheerful */}
+      <div className="fixed -top-32 -right-32 w-140 h-140 bg-gradient-to-bl from-amber-300/40 via-yellow-200/30 to-rose-200/20 rounded-full blur-3xl pointer-events-none -z-10 animate-float-slow" />
+      <div className="fixed -bottom-32 -left-32 w-140 h-140 bg-gradient-to-tr from-sky-300/35 via-indigo-200/25 to-emerald-200/20 rounded-full blur-3xl pointer-events-none -z-10 animate-float-reverse" />
+      <div className="fixed top-1/3 left-1/2 -translate-x-1/2 w-160 h-160 bg-purple-200/25 rounded-full blur-3xl pointer-events-none -z-10" />
+
+      {/* Subtle Playful Grid Pattern */}
+      <div className="fixed inset-0 bg-[radial-gradient(#fde68a_1px,transparent_1px)] [background-size:28px_28px] opacity-40 pointer-events-none -z-10" />
 
       {/* Top Royal Jewel Line */}
-      <div className="h-1.5 w-full bg-gradient-to-r from-amber-400 via-rose-500 via-purple-600 via-sky-400 to-emerald-400 shadow-md" />
+      <div className="h-1.5 w-full bg-gradient-to-r from-amber-400 via-rose-500 via-purple-600 via-sky-400 to-emerald-400 shadow-sm" />
 
       {/* Dynamic Announcement Ticker (Managed by Super Admin in Pengaturan) */}
       {settings.announcementBarEnabled && settings.announcementBarText && (
-        <div className="bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 text-slate-950 py-2 px-4 text-xs font-black text-center flex items-center justify-center gap-2 shadow-sm font-display tracking-wider">
+        <div className="bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 text-slate-950 py-2.5 px-4 text-xs font-black text-center flex items-center justify-center gap-2 shadow-sm font-display tracking-wider">
           <Megaphone className="w-4 h-4 text-slate-950 shrink-0 animate-bounce" />
           <span className="truncate">{settings.announcementBarText}</span>
         </div>
@@ -151,14 +154,14 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
 
       {/* Maintenance Mode Banner (if active) */}
       {settings.maintenanceMode && (
-        <div className="bg-rose-600 text-white py-2 px-4 text-center text-xs font-bold flex items-center justify-center gap-2 shadow-sm">
+        <div className="bg-rose-600 text-white py-2.5 px-4 text-center text-xs font-bold flex items-center justify-center gap-2 shadow-sm">
           <ShieldAlert className="w-4 h-4 shrink-0" />
           <span>{settings.maintenanceMessage}</span>
         </div>
       )}
 
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-xl border-b border-amber-300/20 px-4 lg:px-8 py-3.5 transition-all">
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-amber-200/70 px-4 lg:px-8 py-3.5 transition-all shadow-xs">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           {/* Logo & School Name */}
           <div className="flex items-center gap-3">
@@ -173,7 +176,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.96 }}
                 onClick={() => setShowAdmissionModal(true)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-500 hover:to-yellow-500 text-slate-950 text-xs font-black shadow-md shadow-amber-500/20 cursor-pointer uppercase tracking-wider shimmer-badge"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-500 hover:to-yellow-500 text-slate-950 text-xs font-black shadow-md shadow-amber-400/25 cursor-pointer uppercase tracking-wider shimmer-badge"
               >
                 <UserPlus className="w-3.5 h-3.5 text-slate-950" />
                 <span>Daftar Siswa (PSB)</span>
@@ -185,9 +188,9 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
               href={dynamicWhatsAppUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden sm:inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/40 text-emerald-300 text-xs font-bold transition-all shadow-sm hover:scale-105 active:scale-95"
+              className="hidden sm:inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs font-bold transition-all shadow-xs hover:scale-105 active:scale-95"
             >
-              <MessageCircle className="w-4 h-4 text-emerald-400" />
+              <MessageCircle className="w-4 h-4 text-emerald-600" />
               <span>Tanya WhatsApp</span>
             </a>
 
@@ -207,7 +210,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onOpenLogin}
-                className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-500 hover:to-yellow-500 text-slate-950 text-xs font-black shadow-lg shadow-amber-500/25 cursor-pointer uppercase tracking-wider shimmer-badge"
+                className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-500 hover:to-yellow-500 text-slate-950 text-xs font-black shadow-lg shadow-amber-400/30 cursor-pointer uppercase tracking-wider shimmer-badge"
               >
                 <LogIn className="w-4 h-4 text-slate-950" />
                 <span>Masuk ke Sistem</span>
@@ -219,13 +222,21 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
 
       {/* Hero Showcase Section */}
       <section className="relative px-4 lg:px-8 pt-10 pb-8 max-w-7xl mx-auto w-full text-center space-y-4">
+        {/* Floating Twinkle Star Elements */}
+        <div className="absolute top-6 left-12 hidden md:block pointer-events-none opacity-80">
+          <span className="text-2xl animate-star-twinkle inline-block">✨</span>
+        </div>
+        <div className="absolute top-12 right-16 hidden md:block pointer-events-none opacity-80">
+          <span className="text-2xl animate-bounce-subtle inline-block">⭐</span>
+        </div>
+
         <motion.div 
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-black bg-gradient-to-r from-amber-400/20 via-yellow-400/10 to-amber-500/20 text-amber-300 border border-amber-400/30 uppercase tracking-widest shadow-inner"
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-black bg-gradient-to-r from-amber-100 via-yellow-50 to-amber-100 text-amber-900 border border-amber-300/80 uppercase tracking-widest shadow-xs"
         >
-          <Sparkles className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+          <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-500 animate-pulse" />
           <span>{settings.heroBadgeText || 'Dokumentasi Resmi Little Star Learning Center'}</span>
         </motion.div>
 
@@ -233,7 +244,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight font-display bg-gradient-to-r from-white via-amber-100 to-yellow-200 bg-clip-text text-transparent max-w-4xl mx-auto leading-tight"
+          className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight font-display bg-gradient-to-r from-slate-950 via-blue-950 to-indigo-900 bg-clip-text text-transparent max-w-4xl mx-auto leading-tight"
         >
           {settings.heroTitle || 'Galeri Foto & Video Pembelajaran Inklusif'}
         </motion.h1>
@@ -242,7 +253,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-sm sm:text-base text-slate-400 max-w-2xl mx-auto font-medium"
+          className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto font-medium leading-relaxed"
         >
           {settings.heroSubtitle || 'Membimbing Setiap Bintang Kecil Bersinar Sepenuh Hatinya. Potret kehangatan stimulasi motorik, terapi sensori integrasi, dan kemandirian ananda.'}
         </motion.p>
@@ -259,7 +270,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowAdmissionModal(true)}
-              className="inline-flex items-center gap-2.5 px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-500 hover:to-yellow-500 text-slate-950 font-black text-xs uppercase tracking-wider shadow-xl shadow-amber-500/25 transition-all cursor-pointer shimmer-badge"
+              className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-500 hover:to-yellow-500 text-slate-950 font-black text-xs uppercase tracking-wider shadow-xl shadow-amber-400/30 transition-all cursor-pointer shimmer-badge"
             >
               <UserPlus className="w-4.5 h-4.5 text-slate-950" />
               <span>{settings.heroCtaText || 'Daftar Siswa Baru (PSB Online)'}</span>
@@ -271,7 +282,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
               href={dynamicWhatsAppUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2.5 px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs uppercase tracking-wider shadow-xl shadow-emerald-600/25 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+              className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs uppercase tracking-wider shadow-xl shadow-emerald-600/30 transition-all hover:scale-105 active:scale-95 cursor-pointer"
             >
               <MessageCircle className="w-4.5 h-4.5" />
               <span>Konsultasi WhatsApp Sekolah</span>
@@ -286,17 +297,17 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
           <motion.div 
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="p-4 rounded-3xl bg-gradient-to-r from-amber-500/15 via-yellow-500/10 to-amber-500/5 border border-amber-400/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl"
+            className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-amber-50 via-yellow-50 to-amber-100/60 border-2 border-amber-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg shadow-amber-200/50"
           >
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-2xl bg-amber-400 text-slate-950 font-black shadow-md">
                 <Crown className="w-5 h-5 fill-slate-950" />
               </div>
               <div>
-                <h3 className="text-xs font-black text-white font-display uppercase tracking-wider">
+                <h3 className="text-xs font-black text-slate-950 font-display uppercase tracking-wider">
                   Mode Manajemen Super Admin Aktif
                 </h3>
-                <p className="text-[11px] text-amber-200/80">
+                <p className="text-[11px] text-amber-900 font-medium">
                   Anda memiliki otoritas penuh untuk mengunggah media baru, men-take down, atau menghapus file dokumentasi.
                 </p>
               </div>
@@ -308,9 +319,9 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
                   whileHover={{ scale: 1.04 }}
                   whileTap={{ scale: 0.96 }}
                   onClick={onOpenSettings}
-                  className="px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-rose-300 border border-rose-400/40 text-xs font-black shadow-md inline-flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider"
+                  className="px-4 py-2.5 rounded-2xl bg-white hover:bg-rose-50 text-rose-700 border border-rose-300 text-xs font-black shadow-xs inline-flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider"
                 >
-                  <Sliders className="w-4 h-4 text-rose-400" />
+                  <Sliders className="w-4 h-4 text-rose-600" />
                   <span>Pengaturan Website</span>
                 </motion.button>
               )}
@@ -319,7 +330,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.96 }}
                 onClick={() => setShowUploadModal(true)}
-                className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-500 hover:to-yellow-500 text-slate-950 text-xs font-black shadow-lg shadow-amber-500/20 inline-flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider shrink-0"
+                className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-500 hover:to-yellow-500 text-slate-950 text-xs font-black shadow-md shadow-amber-500/25 inline-flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider shrink-0"
               >
                 <Upload className="w-4 h-4 text-slate-950" />
                 <span>Unggah Foto / Video Baru</span>
@@ -336,7 +347,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
             initial={{ opacity: 0, y: -20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl bg-emerald-500 text-white font-black text-xs shadow-2xl flex items-center gap-2 border border-emerald-300"
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl bg-emerald-600 text-white font-black text-xs shadow-2xl flex items-center gap-2 border border-emerald-400"
           >
             <CheckCircle2 className="w-4 h-4" />
             <span>{toastMessage}</span>
@@ -346,7 +357,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
 
       {/* Filter Tabs & Search Bar */}
       <section className="max-w-7xl mx-auto w-full px-4 lg:px-8 mb-8 space-y-4">
-        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 bg-slate-900/60 backdrop-blur-xl p-3 sm:p-4 rounded-3xl border border-slate-800 shadow-xl">
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 bg-white/90 backdrop-blur-xl p-3 sm:p-4 rounded-3xl border border-amber-200/80 shadow-md shadow-slate-200/60">
           {/* Media Type Tabs */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
             {[
@@ -360,10 +371,10 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
                 <button
                   key={tab.id}
                   onClick={() => setSelectedMediaType(tab.id as any)}
-                  className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1.5 whitespace-nowrap ${
+                  className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1.5 whitespace-nowrap ${
                     isActive 
                       ? 'bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 shadow-md font-black' 
-                      : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                      : 'text-slate-600 hover:text-slate-950 hover:bg-amber-50/80'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -378,7 +389,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
             <select
               value={selectedProgram}
               onChange={(e) => setSelectedProgram(e.target.value)}
-              className="px-3.5 py-2 rounded-2xl bg-slate-800/80 border border-slate-700 text-xs font-bold text-slate-200 outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer"
+              className="px-3.5 py-2.5 rounded-2xl bg-amber-50/50 hover:bg-white border border-amber-200 text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer transition-colors"
             >
               <option value="all">Semua Program Sekolah</option>
               <option value="sekolah_pagi">Sekolah Pagi (Inklusif)</option>
@@ -394,7 +405,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
                 placeholder="Cari dokumentasi..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full sm:w-56 pl-10 pr-4 py-2 rounded-2xl bg-slate-800/80 border border-slate-700 text-xs font-medium text-slate-200 outline-none focus:ring-2 focus:ring-amber-400"
+                className="w-full sm:w-56 pl-10 pr-4 py-2.5 rounded-2xl bg-amber-50/50 hover:bg-white focus:bg-white border border-amber-200 text-xs font-medium text-slate-800 outline-none focus:ring-2 focus:ring-amber-400 transition-colors placeholder:text-slate-400"
               />
             </div>
           </div>
@@ -402,12 +413,12 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
       </section>
 
       {/* Animated Gallery Grid */}
-      <main className="max-w-7xl mx-auto w-full px-4 lg:px-8 pb-20 flex-1">
+      <main className="max-w-7xl mx-auto w-full px-4 lg:px-8 pb-16 flex-1">
         {filteredItems.length === 0 ? (
-          <div className="py-20 text-center text-slate-500 space-y-3 bg-slate-900/30 rounded-3xl border border-slate-800">
-            <Film className="w-12 h-12 mx-auto text-slate-600" />
-            <div className="text-base font-bold text-slate-400">Tidak ada media yang sesuai filter</div>
-            <p className="text-xs text-slate-600">Coba ubah filter kategori atau kata kunci pencarian Anda.</p>
+          <div className="py-20 text-center text-slate-500 space-y-3 bg-white/80 backdrop-blur-sm rounded-3xl border border-dashed border-amber-200 shadow-xs">
+            <Film className="w-12 h-12 mx-auto text-amber-300" />
+            <div className="text-base font-bold text-slate-800">Tidak ada media yang sesuai filter</div>
+            <p className="text-xs text-slate-500">Coba ubah filter kategori atau kata kunci pencarian Anda.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -420,17 +431,17 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: idx * 0.05 }}
-                  whileHover={{ y: -6 }}
-                  className={`group relative overflow-hidden rounded-3xl bg-slate-900/70 border transition-all shadow-xl ${
+                  whileHover={{ y: -8 }}
+                  className={`group relative overflow-hidden rounded-3xl bg-white border transition-all duration-300 shadow-md hover:shadow-2xl ${
                     item.isPublic 
-                      ? 'border-slate-800 hover:border-amber-400/50 hover:shadow-amber-500/10' 
-                      : 'border-rose-500/40 bg-rose-950/10'
+                      ? 'border-amber-200/60 hover:border-amber-400/80 hover:shadow-amber-200/50' 
+                      : 'border-rose-300/80 bg-rose-50/20'
                   }`}
                 >
                   {/* Media Preview Container */}
                   <div 
                     onClick={() => setSelectedMediaItem(item)}
-                    className="relative aspect-video w-full overflow-hidden bg-slate-950 cursor-pointer"
+                    className="relative aspect-video w-full overflow-hidden bg-slate-900 cursor-pointer"
                   >
                     {isVideo ? (
                       <div className="relative w-full h-full flex items-center justify-center bg-slate-900 group-hover:scale-105 transition-transform duration-500">
@@ -440,15 +451,15 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
                             muted
                             loop
                             playsInline
-                            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                            className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
                           />
                         ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-indigo-950 to-slate-900 flex items-center justify-center">
-                            <Film className="w-16 h-16 text-indigo-400/40" />
+                          <div className="w-full h-full bg-gradient-to-br from-indigo-900 to-slate-900 flex items-center justify-center">
+                            <Film className="w-16 h-16 text-amber-300/40" />
                           </div>
                         )}
                         {/* Play Icon Overlay */}
-                        <div className="absolute inset-0 bg-slate-950/40 group-hover:bg-slate-950/20 transition-colors flex items-center justify-center">
+                        <div className="absolute inset-0 bg-slate-950/30 group-hover:bg-slate-950/15 transition-colors flex items-center justify-center">
                           <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-amber-400 to-yellow-400 text-slate-950 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
                             <Play className="w-6 h-6 fill-slate-950 ml-0.5" />
                           </div>
@@ -464,18 +475,18 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
                     )}
 
                     {/* Media Type Badge */}
-                    <div className="absolute top-3 left-3 flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider backdrop-blur-md bg-slate-950/70 text-amber-300 border border-amber-300/30">
-                      {isVideo ? <Film className="w-3 h-3" /> : <ImageIcon className="w-3 h-3" />}
+                    <div className="absolute top-3 left-3 flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider backdrop-blur-md bg-white/90 text-amber-950 border border-amber-300/70 shadow-sm">
+                      {isVideo ? <Film className="w-3 h-3 text-amber-600" /> : <ImageIcon className="w-3 h-3 text-amber-600" />}
                       <span>{isVideo ? 'Video' : 'Foto'}</span>
                     </div>
 
                     {/* Super Admin Status Badge */}
                     {isSuperAdmin && (
                       <div className="absolute top-3 right-3">
-                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border shadow-sm ${
                           item.isPublic 
-                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/50' 
-                            : 'bg-rose-500/20 text-rose-300 border-rose-400/50'
+                            ? 'bg-emerald-500/90 text-white border-emerald-400' 
+                            : 'bg-rose-500/90 text-white border-rose-400'
                         }`}>
                           {item.isPublic ? 'Tayang Publik' : 'Di-Take Down'}
                         </span>
@@ -484,12 +495,12 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
                   </div>
 
                   {/* Card Content */}
-                  <div className="p-5 space-y-3">
-                    <div className="flex items-center justify-between text-[11px] text-slate-400">
-                      <span className="font-extrabold uppercase tracking-wider text-amber-400 font-display">
+                  <div className="p-5 space-y-2.5">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="font-extrabold uppercase tracking-wider text-amber-600 font-display">
                         ★ {item.program.replace('_', ' ')}
                       </span>
-                      <span className="flex items-center gap-1 text-slate-400">
+                      <span className="flex items-center gap-1 text-slate-400 font-medium">
                         <Calendar className="w-3 h-3" />
                         <span>{item.date}</span>
                       </span>
@@ -497,34 +508,34 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
 
                     <h3 
                       onClick={() => setSelectedMediaItem(item)}
-                      className="text-sm font-black text-white font-display group-hover:text-amber-300 transition-colors line-clamp-2 cursor-pointer leading-snug"
+                      className="text-sm font-black text-slate-900 font-display group-hover:text-blue-700 transition-colors line-clamp-2 cursor-pointer leading-snug"
                     >
                       {item.title}
                     </h3>
 
-                    <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                    <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
                       {item.description}
                     </p>
 
                     {/* Super Admin Action Buttons on Each Card */}
                     {isSuperAdmin && (
-                      <div className="pt-3 border-t border-slate-800 flex items-center justify-between gap-2">
+                      <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                         <button
                           onClick={() => handleToggleTakeDown(item)}
                           className={`flex-1 px-3 py-1.5 rounded-xl text-[11px] font-bold border transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
                             item.isPublic 
-                              ? 'bg-amber-500/10 text-amber-300 border-amber-400/30 hover:bg-amber-500/20' 
-                              : 'bg-emerald-500/10 text-emerald-300 border-emerald-400/30 hover:bg-emerald-500/20'
+                              ? 'bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100' 
+                              : 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
                           }`}
                         >
                           {item.isPublic ? (
                             <>
-                              <EyeOff className="w-3.5 h-3.5" />
+                              <EyeOff className="w-3.5 h-3.5 text-amber-700" />
                               <span>Take Down</span>
                             </>
                           ) : (
                             <>
-                              <Eye className="w-3.5 h-3.5" />
+                              <Eye className="w-3.5 h-3.5 text-emerald-700" />
                               <span>Publikasikan</span>
                             </>
                           )}
@@ -532,7 +543,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
 
                         <button
                           onClick={() => handleDelete(item.id, item.title)}
-                          className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition-colors cursor-pointer"
+                          className="p-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-colors cursor-pointer"
                           title="Hapus Permanen"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -655,23 +666,25 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowUploadModal(false)}
-              className="fixed inset-0 bg-slate-950/80 backdrop-blur-md cursor-pointer"
+              className="fixed inset-0 bg-slate-950/70 backdrop-blur-md cursor-pointer"
             />
 
             <motion.div 
               initial={{ opacity: 0, scale: 0.95, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              className="relative z-10 w-full max-w-lg bg-slate-900 rounded-3xl border border-amber-400/40 p-6 sm:p-7 shadow-2xl overflow-hidden"
+              className="relative z-10 w-full max-w-lg bg-white rounded-3xl border border-amber-300 p-6 sm:p-7 shadow-2xl overflow-hidden"
             >
-              <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
+              <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
                 <div className="flex items-center gap-2">
-                  <Upload className="w-5 h-5 text-amber-400" />
-                  <h3 className="text-base font-black text-white font-display">Unggah Foto / Video Baru</h3>
+                  <div className="p-2 rounded-xl bg-amber-100 text-amber-800">
+                    <Upload className="w-5 h-5 text-amber-700" />
+                  </div>
+                  <h3 className="text-base font-black text-slate-900 font-display">Unggah Foto / Video Baru</h3>
                 </div>
                 <button
                   onClick={() => setShowUploadModal(false)}
-                  className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                  className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -679,7 +692,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
 
               <form onSubmit={handleUploadSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1 font-display">
+                  <label className="block text-xs font-bold text-slate-700 mb-1 font-display">
                     Judul Dokumentasi
                   </label>
                   <input
@@ -688,19 +701,19 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
                     placeholder="Contoh: Sesi Terapi Wicara & Motorik Halus..."
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-xs text-white focus:ring-2 focus:ring-amber-400 outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:ring-2 focus:ring-amber-400 outline-none"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-300 mb-1 font-display">
+                    <label className="block text-xs font-bold text-slate-700 mb-1 font-display">
                       Jenis Media
                     </label>
                     <select
                       value={newMediaType}
                       onChange={(e) => setNewMediaType(e.target.value as any)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-xs font-bold text-white outline-none focus:ring-2 focus:ring-amber-400"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs font-bold text-slate-900 outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer"
                     >
                       <option value="image">Foto (Gambar)</option>
                       <option value="video">Video (MP4 / Stream)</option>
@@ -708,13 +721,13 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-300 mb-1 font-display">
+                    <label className="block text-xs font-bold text-slate-700 mb-1 font-display">
                       Program Sekolah
                     </label>
                     <select
                       value={newProgram}
                       onChange={(e) => setNewProgram(e.target.value as any)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-xs font-bold text-white outline-none focus:ring-2 focus:ring-amber-400"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs font-bold text-slate-900 outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer"
                     >
                       <option value="sekolah_pagi">Sekolah Pagi</option>
                       <option value="terapi">Layanan Terapi</option>
@@ -725,7 +738,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1 font-display">
+                  <label className="block text-xs font-bold text-slate-700 mb-1 font-display">
                     URL File / Tautan Media
                   </label>
                   <input
@@ -734,12 +747,12 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
                     placeholder="https://images.unsplash.com/... atau https://...mp4"
                     value={newMediaUrl}
                     onChange={(e) => setNewMediaUrl(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-xs text-white focus:ring-2 focus:ring-amber-400 outline-none font-mono"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:ring-2 focus:ring-amber-400 outline-none font-mono"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1 font-display">
+                  <label className="block text-xs font-bold text-slate-700 mb-1 font-display">
                     Deskripsi Dokumentasi
                   </label>
                   <textarea
@@ -747,7 +760,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
                     placeholder="Tuliskan keterangan aktivitas stimulasi atau momen belajar ananda..."
                     value={newDescription}
                     onChange={(e) => setNewDescription(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-xs text-white focus:ring-2 focus:ring-amber-400 outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:ring-2 focus:ring-amber-400 outline-none"
                   />
                 </div>
 
@@ -759,7 +772,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
                     onChange={(e) => setNewIsPublic(e.target.checked)}
                     className="w-4 h-4 rounded text-amber-500 focus:ring-amber-400 cursor-pointer"
                   />
-                  <label htmlFor="isPublicCheck" className="text-xs text-slate-300 cursor-pointer select-none">
+                  <label htmlFor="isPublicCheck" className="text-xs text-slate-700 font-medium cursor-pointer select-none">
                     Tayangkan langsung di Galeri Publik Little Star
                   </label>
                 </div>
@@ -768,13 +781,13 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
                   <button
                     type="button"
                     onClick={() => setShowUploadModal(false)}
-                    className="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 cursor-pointer"
+                    className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 cursor-pointer"
                   >
                     Batal
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2 rounded-xl text-xs font-black text-slate-950 bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-500 hover:to-yellow-500 shadow-lg shadow-amber-500/20 cursor-pointer uppercase tracking-wider"
+                    className="px-5 py-2 rounded-xl text-xs font-black text-slate-950 bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-500 hover:to-yellow-500 shadow-md shadow-amber-400/30 cursor-pointer uppercase tracking-wider"
                   >
                     Simpan & Unggah
                   </button>
@@ -790,6 +803,31 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
         isOpen={showAdmissionModal}
         onClose={() => setShowAdmissionModal(false)}
       />
+
+      {/* Bright Elegant School Footer */}
+      <footer className="mt-auto border-t border-amber-200/70 bg-white/80 backdrop-blur-xl py-8 px-4 lg:px-8">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+          <div className="flex items-center gap-3">
+            <Logo size="sm" showText={true} />
+          </div>
+          <div className="text-xs text-slate-500 font-medium">
+            © {new Date().getFullYear()} {settings.schoolName || 'Little Star'} Learning Center. All rights reserved. Membimbing Bintang Kecil Menuju Kemandirian & Prestasi.
+          </div>
+          <div className="flex items-center gap-3 text-xs font-bold text-slate-600">
+            <a href={dynamicWhatsAppUrl} target="_blank" rel="noopener noreferrer" className="hover:text-emerald-600 transition-colors">
+              Kontak Resmi
+            </a>
+            <span>·</span>
+            <button onClick={() => setShowAdmissionModal(true)} className="hover:text-amber-600 transition-colors cursor-pointer">
+              Pendaftaran (PSB)
+            </button>
+            <span>·</span>
+            <button onClick={onOpenLogin} className="hover:text-blue-600 transition-colors cursor-pointer">
+              Portal Masuk
+            </button>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
