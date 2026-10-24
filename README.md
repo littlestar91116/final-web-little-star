@@ -1,4 +1,4 @@
-# final-web-LS
+# final-web-little-star
 
 ## Little Star Learning Center — Sistem Manajemen Sekolah Inklusif & Galeri Interaktif
 
