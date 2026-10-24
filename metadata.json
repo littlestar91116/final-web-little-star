@@ -1,0 +1,8 @@
+{
+  "name": "Little Star Learning Center Management System",
+  "description": "Sistem informasi manajemen sekolah, penerimaan siswa baru, pemantauan perkembangan anak (SDR), dan administrasi Little Star Learning Center.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,0 +1,1549 @@
+# MASTER PROMPT GOOGLE AI STUDIO
+# LITTLE STAR LEARNING CENTER
+## SCHOOL MANAGEMENT, ADMISSION & STUDENT DEVELOPMENT SYSTEM
+### FULL PRODUCT REQUIREMENTS DOCUMENT (PRD) + PROGRESSIVE WEB APP (PWA)
+
+---
+
+# BAGIAN 1 — PERAN DAN INSTRUKSI UTAMA
+
+Bertindaklah sebagai tim profesional yang terdiri dari:
+
+1. Senior Full-Stack Developer
+2. Senior Software Architect
+3. Senior UI/UX Designer
+4. Supabase Database Engineer
+5. Product Manager
+6. Education Management System Specialist
+7. Progressive Web App Engineer
+8. Quality Assurance Engineer
+9. Application Security Engineer
+
+Tugas Anda adalah membuat aplikasi lengkap bernama:
+
+**LITTLE STAR LEARNING CENTER MANAGEMENT SYSTEM**
+
+Aplikasi ini merupakan sistem informasi manajemen sekolah terintegrasi yang meliputi administrasi, akademik, penerimaan siswa baru, keuangan, pengelolaan guru dan pegawai, laporan perkembangan siswa, serta komunikasi sekolah dengan orang tua.
+
+Aplikasi harus berbentuk website modern dan Progressive Web App (PWA).
+
+Seluruh bahasa antarmuka menggunakan Bahasa Indonesia.
+
+Jangan hanya membuat mockup, contoh desain, atau dashboard statis.
+
+Bangun aplikasi yang benar-benar terhubung dengan Supabase, memiliki navigasi berfungsi, CRUD, validasi, penyimpanan database, autentikasi, hak akses, dan pengelolaan dokumen.
+
+Jika koneksi Supabase belum dikonfigurasi, buat halaman setup atau tampilkan petunjuk konfigurasi. Jangan menampilkan data dummy seolah-olah data tersebut berasal dari database asli.
+
+Prioritaskan fungsi yang benar, konsistensi data, keamanan, kemudahan penggunaan, dan kesiapan pengembangan jangka panjang.
+
+---
+
+# BAGIAN 2 — PRODUCT REQUIREMENTS DOCUMENT (PRD)
+
+## 2.1 Identitas Produk
+
+Nama Produk:
+Little Star Learning Center Management System
+
+Nama Singkat:
+Little Star Management
+
+Jenis Produk:
+School Management & Student Development Platform
+
+Platform:
+- Website
+- Progressive Web App (PWA)
+- Smartphone Android
+- iPhone/iPad pada browser yang mendukung
+- Tablet
+- Laptop
+- Desktop
+
+Pengguna:
+- Super Admin
+- Admin Sekolah
+- Kepala Sekolah
+- Guru Sekolah Pagi
+- Terapis
+- Shadow Teacher
+- DayCare Teacher
+- Staff Administrasi
+- Staff Keuangan
+- Wali Murid
+- Calon Wali Murid
+
+Bahasa:
+Bahasa Indonesia
+
+## 2.2 Tujuan Aplikasi
+
+Membangun sistem digital terpusat yang mampu:
+
+1. Mengelola seluruh data siswa.
+2. Mengelola data guru, terapis, staff, dan pegawai.
+3. Mengelola pendaftaran siswa baru.
+4. Mengelola pembayaran dan verifikasi administrasi.
+5. Mengelola observasi calon siswa.
+6. Mengelola empat program pendidikan.
+7. Mengatur kelas dan penugasan guru.
+8. Mengelola kegiatan pembelajaran harian.
+9. Memantau tugas mingguan, bulanan, tiga bulanan, dan enam bulanan.
+10. Mengelola rapor perkembangan siswa.
+11. Mencatat kasus dan tindak lanjut.
+12. Melakukan supervisi kepala sekolah.
+13. Mengelola Student Development Record.
+14. Membandingkan perkembangan siswa melalui Development Comparison.
+15. Mengelola Planning Matrix dan program baru.
+16. Mengelola tagihan SPP.
+17. Mengelola galeri dan testimoni.
+18. Memberikan portal informasi untuk wali murid.
+19. Menghasilkan laporan PDF dan Excel.
+20. Menyediakan pengalaman aplikasi melalui teknologi PWA.
+
+## 2.3 Prinsip Produk
+
+Aplikasi wajib:
+
+- Modern
+- Profesional
+- Responsive
+- Mobile-first
+- User-friendly
+- Aman
+- Cepat
+- Modular
+- Scalable
+- Mudah dikembangkan
+- Mudah digunakan pengguna nonteknis
+
+---
+
+# BAGIAN 3 — TEKNOLOGI DAN ARSITEKTUR
+
+Gunakan:
+
+Frontend:
+- React
+- TypeScript
+- Tailwind CSS
+- React Router
+- Komponen UI reusable
+- Library grafik yang kompatibel dengan React
+
+Backend:
+- Supabase
+- PostgreSQL
+- Supabase Authentication
+- Supabase Storage
+- Supabase Edge Functions jika diperlukan
+- Row Level Security (RLS)
+
+PWA:
+- Web App Manifest
+- Service Worker
+- Offline application shell
+- Installable experience
+- Responsive layout
+- Update mechanism
+
+Gunakan environment variables untuk konfigurasi Supabase.
+
+Jangan pernah menempatkan Supabase service_role key atau secret administratif pada frontend.
+
+Gunakan anon/publishable key di client bersama RLS yang benar.
+
+## 3.1 Struktur Proyek
+
+Pisahkan kode menjadi:
+
+- components
+- pages
+- layouts
+- features
+- services
+- hooks
+- contexts
+- lib
+- types
+- utils
+- routes
+- assets
+- styles
+
+Gunakan struktur modular agar setiap modul dapat dikembangkan tanpa merusak modul lainnya.
+
+## 3.2 Integrasi Database
+
+Database utama adalah Supabase PostgreSQL.
+
+Gunakan database yang sudah tersedia jika telah dikonfigurasi.
+
+Jangan menghapus tabel atau data yang sudah ada.
+
+Sebelum membuat migrasi:
+
+1. Identifikasi struktur database yang sudah tersedia.
+2. Periksa nama tabel dan kolom.
+3. Periksa primary key.
+4. Periksa foreign key.
+5. Periksa tipe data.
+6. Periksa relasi.
+7. Periksa constraint.
+8. Periksa RLS.
+9. Buat perubahan hanya jika diperlukan.
+
+Apabila akses metadata database belum tersedia, mintalah file schema SQL atau type definitions yang dapat digunakan untuk memeriksa struktur database.
+
+Jangan menebak nama kolom yang belum diverifikasi.
+
+Gunakan migration SQL yang aman, bersifat incremental, dan tidak menghapus data.
+
+Jangan membuat referensi foreign key sebelum tabel tujuan tersedia.
+
+Khusus tabel employee_contracts, pastikan tabel tersebut benar-benar tersedia sebelum membuat relasi yang mengarah kepadanya.
+
+---
+
+# BAGIAN 4 — DESAIN UI/UX
+
+Buat tampilan website premium, bersih, modern, hangat, dan sesuai identitas sekolah anak.
+
+## 4.1 Tema Visual
+
+Gunakan:
+- Warna utama biru pastel.
+- Warna sekunder kuning lembut.
+- Aksen hijau mint.
+- Background putih atau off-white.
+- Tipografi modern dan mudah dibaca.
+- Border radius lembut.
+- Ikon konsisten.
+- Card dashboard modern.
+- Layout rapi.
+- Animasi halus secukupnya.
+
+Desain harus terlihat profesional sekaligus ramah bagi dunia pendidikan anak.
+
+## 4.2 Layout Desktop
+
+Tampilkan sidebar:
+
+- Dashboard
+- Penerimaan Siswa Baru
+- Observasi
+- Data Siswa
+- Data Guru
+- Data Staff
+- Program Sekolah
+- Kelas & Jadwal
+- Penugasan Guru
+- Tugas Pembelajaran
+- Penilaian Siswa
+- Student Development Record
+- Development Comparison
+- Rapor
+- Planning Matrix
+- Supervisi
+- Kasus & Follow-Up
+- Keuangan & SPP
+- Galeri & Testimoni
+- Portal Orang Tua
+- Dokumen
+- Laporan
+- Manajemen Pengguna
+- Pengaturan
+
+Menu ditampilkan berdasarkan hak akses pengguna.
+
+## 4.3 Layout Mobile
+
+Gunakan:
+- Header sederhana.
+- Navigasi mobile yang mudah digunakan.
+- Bottom navigation untuk menu penting.
+- Sidebar drawer untuk menu lengkap.
+- Tombol berukuran nyaman disentuh.
+- Tabel responsive.
+- Form bertahap.
+- Loading skeleton.
+- Toast notification.
+- Empty state.
+- Error state.
+- Confirmation dialog.
+
+---
+
+# BAGIAN 5 — AUTHENTICATION DAN USER ROLE
+
+Gunakan Supabase Authentication.
+
+## 5.1 Jenis Pengguna
+
+SUPER ADMIN:
+- Seluruh konfigurasi sistem.
+- Manajemen pengguna.
+- Manajemen role.
+- Seluruh modul sesuai kebijakan akses.
+
+ADMIN SEKOLAH:
+- Mengelola pendaftaran.
+- Mengelola siswa.
+- Mengelola program.
+- Mengelola kelas.
+- Mengelola guru dan staff.
+- Mengelola dokumen administrasi.
+- Mengelola jadwal observasi.
+
+KEPALA SEKOLAH:
+- Monitoring kegiatan.
+- Supervisi.
+- Review laporan.
+- Monitoring kasus.
+- Persetujuan rapor.
+- Evaluasi perkembangan.
+- Keputusan program pembelajaran.
+
+GURU/TERAPIS/SHADOW/DAYCARE:
+- Melihat siswa yang ditugaskan.
+- Mengisi tugas harian.
+- Mengisi tugas mingguan.
+- Mengisi tugas bulanan.
+- Mengisi laporan tiga bulanan.
+- Mengisi planning matrix.
+- Mengunggah foto/video.
+- Mengisi kasus siswa.
+- Membuat rekomendasi perkembangan.
+
+STAFF KEUANGAN:
+- Mengelola tagihan.
+- Mengelola pembayaran.
+- Verifikasi pembayaran sesuai kewenangan.
+- Laporan keuangan.
+
+WALI MURID:
+- Melihat profil anak sendiri.
+- Melihat program anak.
+- Melihat rapor yang dipublikasikan.
+- Melihat dokumentasi yang diizinkan.
+- Melihat tagihan.
+- Mengunggah bukti pembayaran.
+- Mengirim testimoni.
+
+CALON WALI MURID:
+- Melakukan pendaftaran.
+- Melihat status pendaftaran.
+- Mengunggah dokumen.
+- Melakukan pembayaran administrasi.
+- Memilih jadwal observasi setelah pembayaran terverifikasi.
+
+## 5.2 Ketentuan Keamanan
+
+- Gunakan role-based access control.
+- Terapkan RLS pada seluruh tabel yang berisi data pengguna.
+- Gunakan kebijakan akses Storage untuk dokumen.
+- Jangan mengandalkan penyembunyian menu sebagai pengamanan.
+- Setiap user hanya boleh mengakses data sesuai kewenangannya.
+- Orang tua hanya boleh melihat data anak yang secara resmi terhubung ke akun mereka.
+- Semua tindakan administratif penting dicatat dalam audit log.
+- Pembuatan akun orang tua otomatis dilakukan melalui proses backend yang aman, bukan dengan menyimpan password di database publik.
+- Jika password awal digunakan, terapkan reset password yang aman ketika login pertama.
+
+---
+
+# BAGIAN 6 — DASHBOARD UTAMA
+
+Buat dashboard sesuai role.
+
+## Dashboard Admin
+
+Tampilkan:
+- Total siswa aktif.
+- Total calon siswa.
+- Total guru.
+- Total terapis.
+- Total staff.
+- Total kelas.
+- Total program.
+- Pendaftaran terbaru.
+- Pembayaran menunggu verifikasi.
+- Observasi terjadwal.
+- Statistik kehadiran.
+- Laporan terbaru.
+
+## Dashboard Kepala Sekolah
+
+Tampilkan:
+- Total siswa.
+- Tugas guru belum selesai.
+- Laporan menunggu review.
+- Kasus terbuka.
+- Supervisi terjadwal.
+- Evaluasi perkembangan.
+- Rekomendasi perubahan program.
+- Statistik perkembangan siswa.
+
+## Dashboard Guru/Terapis
+
+Tampilkan:
+- Siswa binaan.
+- Jadwal hari ini.
+- Tugas harian.
+- Tugas mingguan.
+- Tugas bulanan.
+- Tugas tiga bulanan.
+- Tugas enam bulanan.
+- Tugas terlambat.
+- Laporan perlu revisi.
+- Kasus yang perlu follow-up.
+
+## Dashboard Wali Murid
+
+Tampilkan:
+- Profil anak.
+- Program anak.
+- Jadwal.
+- Tagihan.
+- Rapor tersedia.
+- Dokumentasi pembelajaran yang disetujui.
+- Pengumuman sekolah.
+
+---
+
+# BAGIAN 7 — DATABASE SISWA
+
+Buat modul manajemen siswa dengan:
+
+- ID siswa.
+- NIS jika digunakan.
+- NISN jika tersedia.
+- Nama lengkap.
+- Nama panggilan.
+- Jenis kelamin.
+- Tempat lahir.
+- Tanggal lahir.
+- Alamat.
+- Foto siswa.
+- Tanggal masuk.
+- Tahun ajaran.
+- Status siswa.
+- Kelas.
+- Program yang diikuti.
+- Informasi kebutuhan belajar.
+- Catatan pendukung.
+- Dokumen pendaftaran.
+
+## Data Orang Tua/Wali
+
+- Nama ayah.
+- Nama ibu.
+- Nama wali.
+- Hubungan dengan siswa.
+- Nomor WhatsApp.
+- Email.
+- Pekerjaan.
+- Alamat.
+- Kontak darurat.
+
+Satu siswa dapat mengikuti lebih dari satu program.
+
+Contoh:
+- Sekolah Pagi + Terapi.
+- Sekolah Pagi + Shadow.
+- DayCare + Terapi.
+- Sekolah Pagi + DayCare + Terapi.
+
+Gunakan relasi student_enrollments.
+
+Jangan membuat biodata siswa ganda untuk setiap program.
+
+Fitur:
+- Tambah.
+- Edit.
+- Detail.
+- Arsip.
+- Pencarian.
+- Filter.
+- Import Excel.
+- Export Excel.
+- Export PDF.
+
+---
+
+# BAGIAN 8 — DATABASE GURU, TERAPIS, DAN STAFF
+
+Buat database pegawai yang saling terintegrasi.
+
+Informasi:
+- ID pegawai.
+- Nama.
+- Foto.
+- Jenis kelamin.
+- Kontak.
+- Alamat.
+- Pendidikan.
+- Sertifikat.
+- Keahlian.
+- Jabatan.
+- Tanggal bergabung.
+- Status kepegawaian.
+- Kontrak.
+- Dokumen.
+- Jadwal.
+- Penugasan.
+- Absensi.
+- Cuti dan izin.
+
+Role pengajar:
+- Guru Sekolah Pagi.
+- Terapis.
+- Shadow Teacher.
+- DayCare Teacher.
+
+Satu pegawai dapat memiliki lebih dari satu penugasan jika diizinkan sekolah.
+
+Gunakan teacher_assignments untuk penugasan.
+
+Pastikan tabel employee_contracts dibuat atau diverifikasi sebelum digunakan sebagai target foreign key.
+
+---
+
+# BAGIAN 9 — PENERIMAAN SISWA BARU (PSB)
+
+Buat halaman pendaftaran siswa baru yang dapat diakses calon wali murid.
+
+## 9.1 Formulir Pendaftaran
+
+Data siswa:
+- Nama lengkap.
+- Nama panggilan.
+- Jenis kelamin.
+- Tempat dan tanggal lahir.
+- Alamat.
+- Informasi perkembangan awal.
+
+Data orang tua:
+- Nama ayah.
+- Nama ibu.
+- Nama wali.
+- Nomor WhatsApp.
+- Email.
+- Alamat.
+- Kontak darurat.
+
+Pilihan program menggunakan checkbox multi-select:
+- Sekolah Pagi.
+- Terapi.
+- DayCare.
+- Shadow.
+
+Wali murid boleh memilih lebih dari satu program.
+
+## 9.2 Upload Dokumen
+
+Sediakan:
+- Upload foto siswa.
+- Upload video siswa.
+- Upload scan surat dokter.
+- Upload dokumen pendukung lain.
+
+Terima format file yang relevan, dengan batas ukuran dan validasi tipe file.
+
+Dokumen pribadi harus disimpan dalam Storage bucket privat.
+
+## 9.3 Biaya Administrasi
+
+Admin dapat:
+- Menentukan nominal.
+- Mengubah nominal.
+- Mengatur biaya berdasarkan tahun ajaran.
+- Mengatur ketentuan pembayaran.
+- Memverifikasi pembayaran.
+
+Calon wali murid dapat:
+- Melihat tagihan.
+- Melihat rekening tujuan.
+- Mengunggah bukti transfer.
+- Melihat status pembayaran.
+
+Status:
+- Belum Bayar.
+- Menunggu Verifikasi.
+- Terverifikasi.
+- Ditolak.
+
+Jangan mengubah nominal transaksi lama apabila tarif administrasi baru diperbarui.
+
+## 9.4 Aturan Observasi
+
+Alur wajib:
+
+Pendaftaran → Pemilihan Program → Upload Dokumen → Tagihan Administrasi → Upload Bukti Transfer → Verifikasi Admin → Jadwal Observasi → Pelaksanaan Observasi → Keputusan Penerimaan.
+
+Siswa baru hanya dapat mengakses pilihan jadwal observasi setelah pembayaran diverifikasi.
+
+Admin dapat:
+- Membuat slot observasi.
+- Mengatur tanggal.
+- Mengatur jam.
+- Menentukan petugas.
+- Menentukan kapasitas slot.
+- Memeriksa hasil.
+- Menetapkan keputusan penerimaan.
+
+Cegah pemesanan slot ganda.
+
+Setelah diterima, data calon siswa dapat dikonversi menjadi siswa aktif tanpa input ulang.
+
+---
+
+# BAGIAN 10 — PROGRAM SEKOLAH
+
+Buat empat program:
+
+## A. Sekolah Pagi
+- Deskripsi.
+- Tujuan pembelajaran.
+- Kurikulum.
+- Jadwal.
+- Kegiatan.
+- Fasilitas.
+- Guru.
+- Foto.
+- Video program.
+
+## B. Terapi
+- Deskripsi.
+- Jenis layanan.
+- Tujuan perkembangan.
+- Jadwal.
+- Terapis.
+- Materi pendukung.
+- Foto.
+- Video.
+
+## C. DayCare
+- Deskripsi.
+- Jadwal pengasuhan.
+- Kegiatan.
+- Aktivitas harian.
+- Jadwal makan dan istirahat jika relevan.
+- Guru pendamping.
+- Foto.
+- Video.
+
+## D. Shadow
+- Deskripsi.
+- Tujuan pendampingan.
+- Jadwal.
+- Shadow Teacher.
+- Indikator perkembangan.
+- Laporan kegiatan.
+- Foto.
+- Video.
+
+Admin dapat mengedit seluruh informasi program.
+
+---
+
+# BAGIAN 11 — GALERI DAN TESTIMONI
+
+Buat CMS galeri sekolah.
+
+Fitur:
+- Upload foto.
+- Upload video.
+- Judul.
+- Deskripsi.
+- Kategori.
+- Program.
+- Tanggal.
+- Status publikasi.
+
+Pisahkan:
+- Galeri publik.
+- Galeri internal siswa.
+
+Galeri internal terhubung ke Student Development Record.
+
+Testimoni wali murid:
+- Nama.
+- Testimoni.
+- Foto jika diizinkan.
+- Video jika diizinkan.
+- Status persetujuan.
+- Status publikasi.
+
+Semua konten publik yang menampilkan identitas anak memerlukan persetujuan yang sesuai.
+
+---
+
+# BAGIAN 12 — MANAJEMEN TUGAS GURU
+
+Buat sistem tugas untuk:
+- Guru Sekolah Pagi.
+- Terapis.
+- Shadow Teacher.
+- DayCare Teacher.
+
+Tugas dibagi menjadi lima periode.
+
+## 12.1 TUGAS HARIAN
+
+Setiap hari guru mengisi:
+- Tanggal.
+- Siswa.
+- Program.
+- Kegiatan.
+- Tujuan.
+- Indikator.
+- Nilai perkembangan.
+- Catatan.
+- Foto pembelajaran.
+- Video pembelajaran.
+- Kendala.
+- Kasus jika ada.
+
+Penilaian berdasarkan indikator dan rubrik masing-masing program.
+
+## 12.2 TUGAS MINGGUAN
+
+Setiap minggu guru membuat:
+- Lesson plan mingguan.
+- Tujuan.
+- Materi.
+- Aktivitas.
+- Rencana motorik.
+- Target.
+- Evaluasi.
+- Video kompilasi satu minggu.
+- Catatan perkembangan.
+- Kasus jika ada.
+
+## 12.3 TUGAS BULANAN
+
+Setiap bulan:
+- Rapor bulanan.
+- Ringkasan perkembangan.
+- Capaian target.
+- Hambatan.
+- Rencana bulanan berikutnya.
+- Supervisi.
+- Rekomendasi.
+- Kasus dan follow-up jika ada.
+
+## 12.4 TUGAS TIGA BULANAN
+
+Setiap tiga bulan:
+- Rangkuman perkembangan.
+- Laporan wali siswa.
+- Evaluasi program.
+- Pengisian materi.
+- Supervisi.
+- Analisis perkembangan.
+- Rekomendasi lanjutan.
+
+## 12.5 TUGAS ENAM BULANAN
+
+Setiap enam bulan:
+- Planning Matrix.
+- Evaluasi program sebelumnya.
+- Analisis pencapaian.
+- Target baru.
+- New Program.
+- Rekomendasi perubahan pembelajaran.
+- Persetujuan kepala sekolah.
+
+## 12.6 STATUS TUGAS
+
+Gunakan:
+- Belum Dikerjakan.
+- Draft.
+- Dikirim.
+- Sedang Direview.
+- Perlu Revisi.
+- Disetujui.
+- Terlambat.
+
+Setiap tugas memiliki:
+- ID.
+- Penanggung jawab.
+- Periode.
+- Tenggat.
+- Status.
+- Riwayat revisi.
+- Catatan reviewer.
+
+Buat pengingat otomatis berdasarkan jadwal tugas yang tersimpan.
+
+---
+
+# BAGIAN 13 — PELAPORAN KASUS SISWA
+
+Apabila guru, terapis, shadow teacher, atau daycare teacher menemukan kasus, petugas wajib membuat laporan kasus.
+
+Form:
+- Siswa.
+- Tanggal dan waktu.
+- Program.
+- Pelapor.
+- Jenis kasus.
+- Prioritas.
+- Kronologi objektif.
+- Tindakan awal.
+- Bukti pendukung jika diperlukan.
+- Rekomendasi.
+- Penanggung jawab follow-up.
+
+Alur:
+
+Guru Melaporkan → Kepala Sekolah Menerima → Review → Penetapan Tindakan → Follow-Up → Monitoring → Verifikasi Penyelesaian.
+
+Status:
+- Dilaporkan.
+- Ditinjau.
+- Dalam Tindak Lanjut.
+- Menunggu Evaluasi.
+- Selesai.
+
+Kasus yang memerlukan penanganan keselamatan segera harus memiliki jalur eskalasi prioritas tinggi.
+
+Simpan histori follow-up.
+
+Catatan kasus hanya dapat diakses pengguna berwenang.
+
+---
+
+# BAGIAN 14 — SUPERVISI KEPALA SEKOLAH
+
+Buat dashboard supervisi.
+
+Fitur:
+- Review tugas.
+- Review rapor.
+- Review Planning Matrix.
+- Supervisi guru.
+- Evaluasi program.
+- Review kasus.
+- Catatan revisi.
+- Persetujuan laporan.
+- Monitoring kinerja administrasi pembelajaran.
+
+Kepala sekolah dapat:
+- Menyetujui.
+- Menolak dengan alasan.
+- Meminta revisi.
+- Memberikan rekomendasi.
+- Menetapkan tindak lanjut.
+
+Simpan riwayat supervisi.
+
+---
+
+# BAGIAN 15 — STUDENT DEVELOPMENT RECORD (SDR)
+
+Buat modul utama:
+
+**STUDENT DEVELOPMENT RECORD — REKAM PERKEMBANGAN SISWA**
+
+SDR adalah pusat seluruh riwayat perkembangan siswa selama bersekolah.
+
+Setiap siswa memiliki satu rekam perkembangan utama berdasarkan studentId.
+
+Modul mengintegrasikan:
+
+1. Profil siswa.
+2. Program yang diikuti.
+3. Penugasan guru/terapis.
+4. Target perkembangan.
+5. Penilaian harian.
+6. Penilaian mingguan jika relevan.
+7. Foto pembelajaran.
+8. Video pembelajaran.
+9. Rapor bulanan.
+10. Laporan tiga bulanan.
+11. Planning Matrix enam bulanan.
+12. Catatan kasus.
+13. Follow-up kasus.
+14. Hasil supervisi.
+15. Riwayat perubahan program.
+
+## 15.1 Tampilan SDR
+
+Buat:
+- Student Profile Header.
+- Program aktif.
+- Development Timeline.
+- Tab Penilaian.
+- Tab Dokumentasi.
+- Tab Laporan.
+- Tab Kasus.
+- Tab Planning Matrix.
+- Tab Development Comparison.
+- Tab Supervisi.
+
+## 15.2 Development Timeline
+
+Tampilkan seluruh aktivitas kronologis.
+
+Filter:
+- Tanggal.
+- Program.
+- Jenis aktivitas.
+- Guru/terapis.
+- Periode.
+
+Jangan menggandakan data penilaian.
+
+Gunakan referensi ke dokumen sumber.
+
+## 15.3 Dokumen dan Media
+
+Setiap foto/video dapat ditautkan ke:
+- Siswa.
+- Program.
+- Tugas.
+- Penilaian.
+- Periode.
+- Guru pengunggah.
+
+Media privat tidak boleh ditampilkan secara publik tanpa izin.
+
+## 15.4 Portal Orang Tua
+
+Orang tua hanya melihat:
+- Ringkasan perkembangan yang dipublikasikan.
+- Rapor disetujui.
+- Dokumentasi yang diizinkan.
+- Informasi program.
+
+Catatan kasus internal tidak boleh otomatis dipublikasikan.
+
+---
+
+# BAGIAN 16 — DEVELOPMENT COMPARISON
+
+Buat fitur:
+
+**DEVELOPMENT COMPARISON — PERBANDINGAN PERKEMBANGAN SISWA**
+
+Fungsi untuk membandingkan perkembangan anak menggunakan indikator yang sama dari waktu ke waktu.
+
+## 16.1 Periode
+
+A. Bulanan:
+- Januari vs Februari.
+- Februari vs Maret.
+- Dan seterusnya.
+
+B. Tiga Bulanan:
+- Triwulan 1 vs Triwulan 2.
+- Triwulan 2 vs Triwulan 3.
+
+C. Enam Bulanan:
+- Semester 1 vs Semester 2.
+- Periode enam bulan berikutnya.
+
+Pengguna dapat memilih rentang tanggal.
+
+## 16.2 Indikator
+
+Setiap indikator harus memiliki:
+- ID indikator.
+- Nama.
+- Program.
+- Deskripsi.
+- Definisi operasional.
+- Rubrik.
+- Versi rubrik.
+- Skala nilai.
+- Target.
+
+Contoh domain:
+- Motorik halus.
+- Motorik kasar.
+- Komunikasi.
+- Sosial.
+- Kemandirian.
+- Kognitif.
+- Perilaku belajar.
+
+Indikator harus dikonfigurasi oleh sekolah atau tenaga berwenang.
+
+Jangan menyamakan indikator program berbeda tanpa definisi pengukuran yang sepadan.
+
+## 16.3 Grafik
+
+Buat:
+- Line chart.
+- Bar chart.
+- Perbandingan periode.
+- Target vs capaian.
+- Tabel perubahan skor.
+- Ringkasan catatan perkembangan.
+
+Hitung perubahan hanya jika skala dan rubrik sebanding.
+
+Jika data tidak cukup, tampilkan:
+"Data belum mencukupi untuk perbandingan yang valid."
+
+Jangan mengisi data yang hilang dengan nilai buatan.
+
+## 16.4 Evaluasi Program
+
+Sediakan tiga opsi:
+
+CONTINUE:
+Program dilanjutkan.
+
+MODIFY:
+Program disesuaikan.
+
+REPLACE:
+Program diganti.
+
+Keputusan disertai:
+- Hasil perbandingan.
+- Catatan guru.
+- Evaluasi terapis.
+- Bukti perkembangan.
+- Alasan.
+- Persetujuan kepala sekolah.
+- Tanggal keputusan.
+- Tindak lanjut.
+
+Sistem hanya menyediakan analisis pendukung.
+
+Jangan membuat keputusan otomatis hanya berdasarkan grafik.
+
+## 16.5 Integrasi Planning Matrix
+
+Hasil Development Comparison menjadi dasar pembuatan Planning Matrix enam bulanan.
+
+Kolom:
+- Area perkembangan.
+- Indikator.
+- Target sebelumnya.
+- Capaian aktual.
+- Evaluasi.
+- Kendala.
+- Rekomendasi.
+- Target baru.
+- Program lanjutan.
+- Penanggung jawab.
+- Jadwal evaluasi.
+
+---
+
+# BAGIAN 17 — PEMBAYARAN SPP
+
+Buat modul keuangan dengan empat jenis SPP:
+
+1. SPP Sekolah Pagi.
+2. SPP Shadow.
+3. SPP Terapi.
+4. SPP DayCare.
+
+Satu siswa dapat memiliki lebih dari satu tagihan pada bulan yang sama.
+
+Jangan gabungkan semua jenis SPP menjadi satu tagihan yang tidak dapat dipisahkan.
+
+Setiap jenis program memiliki tagihan tersendiri.
+
+Admin dapat:
+- Menentukan nominal default.
+- Mengubah nominal siswa tertentu.
+- Mengubah nominal per bulan.
+- Mengatur jatuh tempo.
+- Membuat tagihan.
+- Memverifikasi pembayaran.
+- Mencatat pembayaran sebagian jika diizinkan.
+- Membuat laporan.
+
+Khusus Terapi:
+- Nominal boleh berbeda setiap bulan.
+- Biaya dapat disesuaikan jumlah sesi atau ketentuan sekolah.
+- Riwayat nominal lama tetap tersimpan.
+
+Wali murid dapat:
+- Melihat seluruh tagihan anak.
+- Memilih tagihan.
+- Melihat nominal.
+- Mengunggah bukti transfer.
+- Melihat status pembayaran.
+
+Status:
+- Belum Bayar.
+- Menunggu Verifikasi.
+- Dibayar Sebagian.
+- Lunas.
+- Ditolak.
+- Terlambat.
+
+Gunakan tabel invoices dan payments yang sudah tersedia atau sesuaikan secara aman apabila struktur memerlukan perluasan.
+
+---
+
+# BAGIAN 18 — JADWAL DAN ABSENSI
+
+Buat jadwal:
+- Kelas.
+- Pembelajaran.
+- Terapi.
+- Shadow.
+- DayCare.
+- Observasi.
+- Supervisi.
+
+Buat absensi:
+- Siswa.
+- Guru.
+- Terapis.
+- Staff.
+
+Status:
+- Hadir.
+- Izin.
+- Sakit.
+- Tidak Hadir.
+
+Fitur:
+- Input absensi.
+- Rekap.
+- Filter.
+- Laporan.
+- Export.
+
+Pastikan jadwal dan absensi terhubung dengan program dan penugasan.
+
+---
+
+# BAGIAN 19 — GALERI INTERNAL, RAPOR, DAN LAPORAN
+
+Buat sistem dokumen terintegrasi.
+
+Laporan:
+- Data siswa.
+- Data guru.
+- Data staff.
+- Pendaftaran.
+- Pembayaran.
+- Observasi.
+- Absensi.
+- Tugas guru.
+- Penilaian harian.
+- Rapor bulanan.
+- Evaluasi tiga bulanan.
+- Planning Matrix enam bulanan.
+- Kasus.
+- Supervisi.
+- Development Comparison.
+- Keuangan SPP.
+
+Fitur:
+- Preview.
+- Filter.
+- Export Excel.
+- Export PDF.
+- Print.
+- Download.
+
+Untuk laporan siswa:
+- Tampilkan identitas.
+- Program.
+- Periode.
+- Indikator.
+- Hasil penilaian.
+- Catatan evaluasi.
+- Rekomendasi.
+- Status persetujuan.
+
+---
+
+# BAGIAN 20 — NOTIFIKASI
+
+Buat pusat notifikasi.
+
+Jenis notifikasi:
+- Pendaftaran masuk.
+- Pembayaran menunggu verifikasi.
+- Pembayaran disetujui.
+- Jadwal observasi.
+- Jadwal pembelajaran.
+- Tenggat tugas.
+- Tugas terlambat.
+- Laporan perlu revisi.
+- Rapor disetujui.
+- Kasus baru.
+- Kasus prioritas tinggi.
+- Follow-up kasus.
+- Supervisi.
+- Laporan baru untuk orang tua.
+- Tagihan SPP.
+
+Notifikasi dalam aplikasi wajib tersedia.
+
+Push notification PWA dapat ditambahkan pada perangkat/browser yang mendukung, setelah pengguna memberikan izin.
+
+Jangan mengirim informasi sensitif siswa secara lengkap pada isi push notification.
+
+---
+
+# BAGIAN 21 — PROGRESSIVE WEB APP (PWA)
+
+Aplikasi wajib dirancang sebagai Progressive Web App.
+
+## 21.1 PWA Requirements
+
+Implementasikan:
+- Web App Manifest.
+- Nama aplikasi.
+- Short name.
+- Theme color.
+- Background color.
+- Ikon aplikasi.
+- Icon 192×192.
+- Icon 512×512.
+- Service Worker.
+- HTTPS.
+- Standalone display.
+- Responsive design.
+- Installability pada browser yang mendukung.
+
+## 21.2 Pengalaman Pengguna
+
+Aplikasi harus terasa seperti aplikasi native.
+
+Ketika dibuka di HP:
+- Layout menyesuaikan.
+- Navigasi nyaman.
+- Form mudah diisi.
+- Tombol tidak terlalu kecil.
+- Media bisa ditampilkan dengan baik.
+
+## 21.3 Offline Support
+
+Sediakan:
+- Offline application shell.
+- Halaman offline.
+- Indikator online/offline.
+- Cache aset statis.
+- Retry untuk operasi yang gagal.
+- Sinkronisasi data yang diizinkan setelah online.
+
+Jangan otomatis menyimpan seluruh database sekolah secara lokal.
+
+Data medis, dokumen identitas, kasus rahasia, dan media pribadi siswa tidak boleh dicache secara sembarangan.
+
+Jika mendukung draft offline, batasi penyimpanan sesuai role dan keamanan perangkat.
+
+Tampilkan konflik sinkronisasi kepada pengguna jika ada perubahan bersamaan.
+
+## 21.4 Instalasi
+
+Sediakan panduan instalasi:
+
+Android:
+Gunakan opsi Install App atau Add to Home Screen jika tersedia.
+
+iPhone/iPad:
+Gunakan fasilitas Add to Home Screen pada browser yang mendukung.
+
+Desktop:
+Gunakan opsi instalasi aplikasi jika didukung browser.
+
+Jangan mengklaim PWA dapat diinstal identik pada seluruh browser dan perangkat.
+
+---
+
+# BAGIAN 22 — STRUKTUR DATABASE SUPABASE
+
+Gunakan 55 tabel berikut sebagai referensi struktur database yang sudah dirancang.
+
+## Identitas dan Pegawai
+1. profiles
+2. roles
+3. user_roles
+4. staff
+5. teachers
+6. parents
+7. students
+8. student_guardians
+9. employee_leaves
+10. employee_contracts
+
+## Akademik dan Program
+11. academic_years
+12. classes
+13. student_class_assignments
+14. programs
+15. program_content
+16. student_enrollments
+17. teacher_assignments
+18. schedules
+19. attendance
+
+## Penerimaan dan Keuangan
+20. admissions
+21. admission_programs
+22. registration_fee_rules
+23. invoices
+24. payments
+25. observation_slots
+26. observations
+27. admission_documents
+
+## Penilaian dan Pembelajaran
+28. learning_indicators
+29. assessment_rubrics
+30. development_goals
+31. daily_assessments
+32. development_assessments
+33. weekly_plans
+34. monthly_reports
+35. quarterly_reports
+36. semester_plans
+37. planning_matrix_items
+
+## Supervisi dan Tugas
+38. supervisions
+39. student_cases
+40. case_followups
+41. task_assignments
+42. task_reviews
+
+## Student Development Record
+43. student_development_records
+44. development_media
+45. development_timeline
+
+## Development Comparison
+46. development_comparisons
+47. development_evaluations
+48. program_decisions
+
+## Media dan Sistem
+49. gallery
+50. testimonials
+51. media_consents
+52. documents
+53. notifications
+54. audit_logs
+55. school_settings
+
+PENTING:
+
+Nama tabel di atas adalah referensi berdasarkan rancangan database yang tersedia.
+
+Sebelum melakukan query atau membuat kolom baru, verifikasi skema aktual Supabase.
+
+Jangan mengasumsikan semua tabel memiliki kolom tertentu tanpa pemeriksaan.
+
+Jangan membuat ulang tabel yang sudah ada.
+
+Jika kebutuhan fitur belum tercakup, buat migrasi tambahan yang aman.
+
+Jangan menonaktifkan RLS agar query berhasil.
+
+Buat policies yang benar sesuai role dan kepemilikan data.
+
+---
+
+# BAGIAN 23 — KEAMANAN DATABASE
+
+Gunakan prinsip least privilege.
+
+Implementasikan:
+- RLS untuk seluruh tabel yang memerlukan pembatasan akses.
+- Policies berdasarkan role.
+- Policies berdasarkan relasi siswa-orang tua.
+- Policies berdasarkan penugasan guru.
+- Storage bucket privat untuk dokumen sensitif.
+- Validasi otorisasi backend.
+- Audit log.
+- Validasi file upload.
+- Pembatasan ukuran file.
+- Perlindungan input.
+- Pencegahan duplikasi transaksi.
+
+Data anak, surat dokter, dokumen keluarga, kasus, dan laporan perkembangan harus diperlakukan sebagai data sensitif.
+
+Penerimaan siswa dan pembayaran harus menggunakan transaksi atau mekanisme backend yang menjaga konsistensi data.
+
+Jangan membuat halaman admin hanya berdasarkan pengecekan role frontend.
+
+---
+
+# BAGIAN 24 — NON-FUNCTIONAL REQUIREMENTS
+
+Aplikasi harus:
+- Cepat dan responsive.
+- Mendukung berbagai ukuran layar.
+- Memiliki validasi formulir.
+- Memiliki error handling.
+- Memiliki loading state.
+- Mendukung pencarian dan pagination.
+- Mampu menangani data yang bertambah.
+- Menggunakan query yang efisien.
+- Menyimpan waktu pencatatan secara konsisten.
+- Menggunakan zona waktu Asia/Jakarta saat menampilkan jadwal lokal.
+- Memiliki audit trail.
+- Memiliki mekanisme backup dan recovery.
+- Mengutamakan aksesibilitas.
+- Tidak kehilangan data saat pengguna berpindah halaman.
+- Menangani kegagalan jaringan secara jelas.
+
+---
+
+# BAGIAN 25 — ACCEPTANCE CRITERIA
+
+Aplikasi dianggap memenuhi kebutuhan apabila:
+
+1. Pengguna bisa login sesuai role.
+2. Semua menu hanya terlihat sesuai hak akses.
+3. CRUD data siswa berfungsi.
+4. CRUD guru dan staff berfungsi.
+5. Multi-program siswa berjalan.
+6. Pendaftaran siswa baru berjalan.
+7. Upload dokumen berjalan.
+8. Tagihan administrasi dibuat dengan benar.
+9. Admin bisa memverifikasi pembayaran.
+10. Observasi hanya bisa dijadwalkan setelah pembayaran terverifikasi.
+11. Penempatan siswa tidak membuat data ganda.
+12. Guru bisa mengisi tugas harian.
+13. Guru bisa membuat lesson plan mingguan.
+14. Guru bisa membuat rapor bulanan.
+15. Laporan tiga bulanan berfungsi.
+16. Planning Matrix enam bulanan berfungsi.
+17. Foto dan video tersimpan dengan benar.
+18. Kasus bisa dilaporkan dan ditindaklanjuti.
+19. Kepala sekolah bisa melakukan supervisi.
+20. SDR menampilkan seluruh riwayat perkembangan.
+21. Development Comparison membandingkan indikator yang valid.
+22. Kepala sekolah bisa menetapkan keputusan program.
+23. SPP setiap program terpisah.
+24. Nominal terapi bisa berubah per bulan.
+25. Wali murid hanya melihat data anak sendiri.
+26. Galeri dan testimoni bisa dikelola.
+27. Export PDF/Excel berfungsi.
+28. Aplikasi responsive.
+29. PWA dapat diinstal pada perangkat yang mendukung.
+30. Tidak ada akses data sensitif tanpa otorisasi.
+
+---
+
+# BAGIAN 26 — TAHAP IMPLEMENTASI
+
+Bangun secara bertahap, dengan urutan berikut.
+
+FASE 1 — FOUNDATION
+- Setup React dan TypeScript.
+- Setup Tailwind.
+- Setup Supabase.
+- Authentication.
+- Role management.
+- RLS.
+- Layout dan navigasi.
+- Dashboard.
+- PWA dasar.
+
+FASE 2 — MASTER DATA
+- Data siswa.
+- Data orang tua.
+- Data guru.
+- Data staff.
+- Kelas.
+- Program.
+- Penugasan.
+
+FASE 3 — ADMISSION
+- Pendaftaran online.
+- Multi-select program.
+- Upload dokumen.
+- Pembayaran administrasi.
+- Verifikasi.
+- Observasi.
+- Penerimaan siswa.
+
+FASE 4 — LEARNING MANAGEMENT
+- Jadwal.
+- Absensi.
+- Tugas harian.
+- Lesson plan mingguan.
+- Tugas bulanan.
+- Laporan tiga bulanan.
+- Planning Matrix enam bulanan.
+
+FASE 5 — SUPERVISION
+- Kasus.
+- Follow-up.
+- Supervisi.
+- Review.
+- Approval.
+
+FASE 6 — STUDENT DEVELOPMENT
+- Student Development Record.
+- Development Timeline.
+- Dokumentasi.
+- Rapor.
+- Development Comparison.
+- Program Evaluation.
+
+FASE 7 — FINANCE & PARENT PORTAL
+- Tagihan SPP.
+- Pembayaran.
+- Portal orang tua.
+- Notifikasi.
+- Galeri.
+- Testimoni.
+
+FASE 8 — FINALIZATION
+- PDF dan Excel.
+- Pengujian lengkap.
+- Pengujian RLS.
+- Pengujian PWA.
+- Optimasi performa.
+- Deployment.
+
+---
+
+# BAGIAN 27 — INSTRUKSI KHUSUS GOOGLE AI STUDIO
+
+Mulailah dengan membuat project React + TypeScript yang benar-benar dapat dijalankan.
+
+Prioritaskan arsitektur aplikasi, koneksi Supabase, login, hak akses, dan dashboard.
+
+Kemudian implementasikan modul secara bertahap sesuai fase.
+
+Untuk setiap fase:
+1. Buat struktur kode.
+2. Buat halaman.
+3. Buat komponen.
+4. Buat layanan database.
+5. Integrasikan Supabase.
+6. Tambahkan validasi.
+7. Tambahkan loading dan error state.
+8. Terapkan RLS yang diperlukan.
+9. Periksa relasi.
+10. Uji fungsi.
+
+Jika lingkungan pengembangan tidak menyediakan akses langsung ke proyek Supabase, jangan mengklaim koneksi atau pengujian sudah berhasil.
+
+Tampilkan konfigurasi yang dibutuhkan dan berikan migration SQL yang dapat diperiksa sebelum dieksekusi.
+
+Jangan membuat data dummy sebagai pengganti data produksi.
+
+Jangan menghapus struktur atau kode yang sudah berfungsi ketika membuat modul baru.
+
+Gunakan komponen reusable, kode bersih, dan komentar seperlunya.
+
+Buat aplikasi dengan standar profesional dan siap dikembangkan lebih lanjut.
+
+HASIL YANG DIHARAPKAN:
+
+Little Star Learning Center memiliki satu aplikasi PWA terintegrasi yang dapat mengelola seluruh administrasi sekolah, penerimaan siswa, pendidikan, kegiatan guru, perkembangan anak, evaluasi program, supervisi, keuangan, serta komunikasi wali murid.
+
+Aplikasi harus menjadi sistem operasional sekolah yang benar-benar menggunakan Supabase sebagai sumber data utama, bukan sekadar prototipe visual.
+
+**MULAI IMPLEMENTASI SEKARANG DARI FASE 1, DAN PASTIKAN ARSITEKTURNYA SUDAH MENDUKUNG SELURUH MODUL DALAM PRD INI.**
