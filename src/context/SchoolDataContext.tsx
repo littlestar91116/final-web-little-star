@@ -56,11 +56,12 @@ interface SchoolDataContextType {
   consultations: ConsultationRequest[];
 
   // Student Actions
-  addStudent: (student: Omit<Student, 'id'>) => void;
+  addStudent: (student: Omit<Student, 'id'> & { id?: string }) => string;
   updateStudent: (id: string, data: Partial<Student>) => void;
+  deleteStudent: (id: string) => void;
   
   // Staff Actions
-  addStaff: (member: Omit<StaffMember, 'id'>) => void;
+  addStaff: (member: Omit<StaffMember, 'id'> & { id?: string }) => string;
   updateStaff: (id: string, data: Partial<StaffMember>) => void;
   deleteStaff: (id: string) => void;
 
@@ -255,19 +256,25 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   }, [detailedPrograms]);
 
   // Student Actions
-  const addStudent = (newStd: Omit<Student, 'id'>) => {
-    const id = `std-${Date.now().toString().slice(-4)}`;
+  const addStudent = (newStd: Omit<Student, 'id'> & { id?: string }): string => {
+    const id = newStd.id || `std-${Date.now().toString().slice(-4)}`;
     setStudents(prev => [{ ...newStd, id }, ...prev]);
+    return id;
   };
 
   const updateStudent = (id: string, data: Partial<Student>) => {
     setStudents(prev => prev.map(s => s.id === id ? { ...s, ...data } : s));
   };
 
+  const deleteStudent = (id: string) => {
+    setStudents(prev => prev.filter(s => s.id !== id));
+  };
+
   // Staff Actions
-  const addStaff = (member: Omit<StaffMember, 'id'>) => {
-    const id = `stf-${Date.now().toString().slice(-4)}`;
+  const addStaff = (member: Omit<StaffMember, 'id'> & { id?: string }): string => {
+    const id = member.id || `stf-${Date.now().toString().slice(-4)}`;
     setStaff(prev => [{ ...member, id }, ...prev]);
+    return id;
   };
 
   const updateStaff = (id: string, data: Partial<StaffMember>) => {
@@ -653,6 +660,7 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       consultations,
       addStudent,
       updateStudent,
+      deleteStudent,
       addStaff,
       updateStaff,
       deleteStaff,

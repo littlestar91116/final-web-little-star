@@ -41,7 +41,7 @@ export const StaffModule: React.FC = () => {
     deletePosition
   } = useSchoolData();
 
-  const { currentUser, accounts, createOrUpdateAccount } = useAuth();
+  const { currentUser, accounts, createOrUpdateAccount, deleteAccount } = useAuth();
   const isSuperAdmin = currentUser?.role === 'super_admin';
 
   // Sub-navigation tab: 'staff' | 'positions' | 'classes'
@@ -125,9 +125,9 @@ export const StaffModule: React.FC = () => {
       setStaffPrograms(member.assignedPrograms);
       setStaffStudentsCount(member.assignedStudentsCount || 0);
       setStaffPhotoUrl(member.photoUrl);
-      const acc = accounts.find(a => a.staffId === member.id || a.name === member.name);
-      setStaffUsername(acc?.username || `staff.${member.name.split(' ')[0].toLowerCase()}`);
-      setStaffPassword(acc?.password || '12345');
+      const acc = accounts.find(a => a.staffId === member.id || a.username === member.accountUsername || a.name === member.name);
+      setStaffUsername(acc?.username || member.accountUsername || `staff.${member.name.split(' ')[0].toLowerCase()}`);
+      setStaffPassword(acc?.password || member.accountPassword || '12345');
     } else {
       setEditingStaff(null);
       setStaffName('');
@@ -176,12 +176,16 @@ export const StaffModule: React.FC = () => {
         specialization: staffSpecialization.trim(),
         assignedPrograms: staffPrograms,
         assignedStudentsCount: Number(staffStudentsCount),
-        photoUrl: finalPhoto
+        photoUrl: finalPhoto,
+        accountUsername: staffUsername.trim().toLowerCase() || undefined,
+        accountPassword: staffPassword.trim() || '12345'
       });
 
       // Update account if username provided
       if (staffUsername.trim()) {
+        const existingAcc = accounts.find(a => a.staffId === editingStaff.id || a.username === editingStaff.accountUsername || a.name === editingStaff.name);
         createOrUpdateAccount({
+          id: existingAcc?.id,
           username: staffUsername.trim().toLowerCase(),
           password: staffPassword.trim() || '12345',
           name: staffName.trim(),
@@ -196,7 +200,10 @@ export const StaffModule: React.FC = () => {
       showToast(`Data pendidik "${staffName}" berhasil diperbarui!`);
     } else {
       const newStaffId = `stf-${Date.now().toString().slice(-4)}`;
+      const uName = staffUsername.trim() || `staff.${staffName.split(' ')[0].toLowerCase()}`;
+
       addStaff({
+        id: newStaffId,
         nip: staffNip.trim() || `ST-0${staff.length + 1}-00${staff.length + 1}`,
         name: staffName.trim(),
         role: staffRole,
@@ -210,10 +217,11 @@ export const StaffModule: React.FC = () => {
         joinDate: new Date().toISOString().split('T')[0],
         assignedPrograms: staffPrograms.length > 0 ? staffPrograms : ['sekolah_pagi'],
         assignedStudentsCount: Number(staffStudentsCount) || 5,
-        photoUrl: finalPhoto
+        photoUrl: finalPhoto,
+        accountUsername: uName.toLowerCase(),
+        accountPassword: staffPassword.trim() || '12345'
       });
 
-      const uName = staffUsername.trim() || `staff.${staffName.split(' ')[0].toLowerCase()}`;
       createOrUpdateAccount({
         username: uName.toLowerCase(),
         password: staffPassword.trim() || '12345',
@@ -234,16 +242,20 @@ export const StaffModule: React.FC = () => {
   const handleDeleteStaff = (member: StaffMember) => {
     if (confirm(`Apakah Anda yakin ingin menghapus data pendidik "${member.name}" (${member.jobTitle})?`)) {
       deleteStaff(member.id);
-      showToast(`Data pendidik "${member.name}" berhasil dihapus.`);
+      const acc = accounts.find(a => a.staffId === member.id || a.username === member.accountUsername || a.name === member.name);
+      if (acc && acc.username !== 'admin') {
+        deleteAccount(acc.id);
+      }
+      showToast(`Data pendidik "${member.name}" dan akun login berhasil dihapus.`);
     }
   };
 
   // Quick Credential Edit
   const handleOpenQuickCreds = (member: StaffMember) => {
     setEditingCredsStaff(member);
-    const existingAcc = accounts.find(a => a.staffId === member.id || a.name === member.name);
-    setQuickUsername(existingAcc?.username || `staff.${member.name.split(' ')[0].toLowerCase()}`);
-    setQuickPassword(existingAcc?.password || '12345');
+    const existingAcc = accounts.find(a => a.staffId === member.id || a.username === member.accountUsername || a.name === member.name);
+    setQuickUsername(existingAcc?.username || member.accountUsername || `staff.${member.name.split(' ')[0].toLowerCase()}`);
+    setQuickPassword(existingAcc?.password || member.accountPassword || '12345');
     setShowQuickCredModal(true);
   };
 
@@ -251,15 +263,25 @@ export const StaffModule: React.FC = () => {
     e.preventDefault();
     if (!editingCredsStaff || !quickUsername.trim()) return;
 
+    const cleanUsername = quickUsername.trim().toLowerCase();
+    const cleanPassword = quickPassword.trim() || '12345';
+    const existingAcc = accounts.find(a => a.staffId === editingCredsStaff.id || a.username === editingCredsStaff.accountUsername || a.name === editingCredsStaff.name);
+
     createOrUpdateAccount({
-      username: quickUsername.trim().toLowerCase(),
-      password: quickPassword.trim() || '12345',
+      id: existingAcc?.id,
+      username: cleanUsername,
+      password: cleanPassword,
       name: editingCredsStaff.name,
       role: editingCredsStaff.role,
       staffId: editingCredsStaff.id,
       email: editingCredsStaff.email,
       phone: editingCredsStaff.phone,
       avatarUrl: editingCredsStaff.photoUrl
+    });
+
+    updateStaff(editingCredsStaff.id, {
+      accountUsername: cleanUsername,
+      accountPassword: cleanPassword
     });
 
     setShowQuickCredModal(false);
@@ -500,7 +522,7 @@ export const StaffModule: React.FC = () => {
           {/* Staff Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {filteredStaff.map(member => {
-              const acc = accounts.find(a => a.staffId === member.id || a.name === member.name);
+              const acc = accounts.find(a => a.staffId === member.id || a.username === member.accountUsername || a.name === member.name);
               
               // Role badge color
               const roleBadgeColor = 
@@ -542,10 +564,10 @@ export const StaffModule: React.FC = () => {
                           Akun Login Pegawai:
                         </div>
                         <div className="font-mono text-[11px] text-blue-950 font-black mt-0.5">
-                          User: <span className="text-blue-700">{acc?.username || `staff.${member.name.split(' ')[0].toLowerCase()}`}</span>
+                          User: <span className="text-blue-700">{acc?.username || member.accountUsername || `staff.${member.name.split(' ')[0].toLowerCase()}`}</span>
                         </div>
                         <div className="font-mono text-[10px] text-slate-600">
-                          Pass: <span className="font-bold">{acc?.password || '12345'}</span>
+                          Pass: <span className="font-bold">{acc?.password || member.accountPassword || '12345'}</span>
                         </div>
                       </div>
 

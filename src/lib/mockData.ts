@@ -260,6 +260,8 @@ export const INITIAL_STUDENTS: Student[] = [
     className: 'Bintang Kejora (Kelas A)',
     enrolledPrograms: ['sekolah_pagi', 'terapi'],
     specialNeedsNotes: 'Keterlambatan bicara ringan (Speech Delay), saat ini rutin Terapi Wicara 2x per minggu.',
+    accountUsername: 'wali.dylan',
+    accountPassword: '12345',
     parent: {
       fatherName: 'Bambang Pratama',
       motherName: 'Ratna Dewi Kusuma',
@@ -344,6 +346,8 @@ export const INITIAL_STUDENTS: Student[] = [
     className: 'Bintang Kecil (Toddler)',
     enrolledPrograms: ['daycare'],
     specialNeedsNotes: 'Sensitivitas tekstur makanan tertentu.',
+    accountUsername: 'wali.mikha',
+    accountPassword: '12345',
     parent: {
       fatherName: 'Aditya Kurniawan',
       motherName: 'Larasati',
@@ -374,7 +378,9 @@ export const INITIAL_STAFF: StaffMember[] = [
     joinDate: '2020-01-15',
     status: 'tetap',
     assignedPrograms: ['sekolah_pagi', 'terapi', 'daycare', 'shadow'],
-    assignedStudentsCount: 42
+    assignedStudentsCount: 42,
+    accountUsername: 'kepala.nurul',
+    accountPassword: '12345'
   },
   {
     id: 'stf-002',
@@ -391,7 +397,9 @@ export const INITIAL_STAFF: StaffMember[] = [
     joinDate: '2022-07-01',
     status: 'tetap',
     assignedPrograms: ['sekolah_pagi'],
-    assignedStudentsCount: 14
+    assignedStudentsCount: 14,
+    accountUsername: 'guru.sarah',
+    accountPassword: '12345'
   },
   {
     id: 'stf-003',
@@ -408,7 +416,9 @@ export const INITIAL_STAFF: StaffMember[] = [
     joinDate: '2021-09-10',
     status: 'tetap',
     assignedPrograms: ['terapi'],
-    assignedStudentsCount: 11
+    assignedStudentsCount: 11,
+    accountUsername: 'terapis.rian',
+    accountPassword: '12345'
   },
   {
     id: 'stf-004',
@@ -425,7 +435,9 @@ export const INITIAL_STAFF: StaffMember[] = [
     joinDate: '2023-01-10',
     status: 'kontrak',
     assignedPrograms: ['shadow'],
-    assignedStudentsCount: 3
+    assignedStudentsCount: 3,
+    accountUsername: 'shadow.dita',
+    accountPassword: '12345'
   },
   {
     id: 'stf-005',
@@ -442,7 +454,9 @@ export const INITIAL_STAFF: StaffMember[] = [
     joinDate: '2021-03-01',
     status: 'tetap',
     assignedPrograms: ['daycare'],
-    assignedStudentsCount: 18
+    assignedStudentsCount: 18,
+    accountUsername: 'daycare.fitri',
+    accountPassword: '12345'
   },
   {
     id: 'stf-006',
@@ -459,7 +473,9 @@ export const INITIAL_STAFF: StaffMember[] = [
     joinDate: '2022-02-15',
     status: 'tetap',
     assignedPrograms: ['sekolah_pagi', 'terapi', 'daycare', 'shadow'],
-    assignedStudentsCount: 42
+    assignedStudentsCount: 42,
+    accountUsername: 'keuangan.ilham',
+    accountPassword: '12345'
   }
 ];
 

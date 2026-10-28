@@ -94,6 +94,7 @@ export const StudentsModule: React.FC = () => {
     const finalPassword = parentPassword.trim() || '12345';
 
     addStudent({
+      id: newId,
       nis: `LS-2026-${String(students.length + 1).padStart(3, '0')}`,
       fullName,
       nickname: nickname || fullName.split(' ')[0],
@@ -158,9 +159,14 @@ export const StudentsModule: React.FC = () => {
       return;
     }
 
+    const cleanUsername = editUsername.trim().toLowerCase();
+    const cleanPassword = editPassword.trim();
+    const existingAcc = accounts.find(a => a.childStudentId === selectedStudentDetail.id || a.username === selectedStudentDetail.accountUsername);
+
     createOrUpdateAccount({
-      username: editUsername.trim().toLowerCase(),
-      password: editPassword.trim(),
+      id: existingAcc?.id,
+      username: cleanUsername,
+      password: cleanPassword,
       name: `Wali Murid (${selectedStudentDetail.fullName})`,
       role: 'wali_murid',
       childStudentId: selectedStudentDetail.id,
@@ -169,8 +175,8 @@ export const StudentsModule: React.FC = () => {
     });
 
     updateStudent(selectedStudentDetail.id, {
-      accountUsername: editUsername.trim().toLowerCase(),
-      accountPassword: editPassword.trim()
+      accountUsername: cleanUsername,
+      accountPassword: cleanPassword
     });
 
     setSelectedStudentDetail(prev => prev ? {

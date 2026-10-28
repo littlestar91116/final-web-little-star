@@ -6,13 +6,15 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { SchoolDataProvider } from './context/SchoolDataContext';
+import { SchoolDataProvider, useSchoolData } from './context/SchoolDataContext';
 import { LoginPage } from './components/auth/LoginPage';
 import { Header } from './components/common/Header';
 import { Sidebar } from './components/common/Sidebar';
 import { BottomNav } from './components/common/BottomNav';
 import { BrandingBanner } from './components/common/BrandingBanner';
 import { SupabaseSetupModal } from './components/common/SupabaseSetupModal';
+import { AccountFrozenModal } from './components/auth/AccountFrozenModal';
+import { checkAccountLockStatus } from './lib/accountLockService';
 
 // Dashboards
 import { AdminDashboard } from './components/dashboard/AdminDashboard';
@@ -40,11 +42,13 @@ import { SiteSettingsProvider } from './context/SiteSettingsContext';
 import { LogoIntroBackground } from './components/common/LogoIntroBackground';
 
 const MainLayout: React.FC = () => {
-  const { currentUser, isAuthenticated } = useAuth();
+  const { currentUser, isAuthenticated, logout } = useAuth();
+  const { invoices } = useSchoolData();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [supabaseModalOpen, setSupabaseModalOpen] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [activeModule, setActiveModule] = useState('dashboard');
+  const [showActiveFrozenPopup, setShowActiveFrozenPopup] = useState(true);
 
   // If not logged in, render the animated Gallery Landing Page as the initial entry point.
   // The Login button is placed in the top right, opening the LoginModal popup!
@@ -57,6 +61,54 @@ const MainLayout: React.FC = () => {
         <LoginModal 
           isOpen={loginModalOpen} 
           onClose={() => setLoginModalOpen(false)} 
+        />
+      </>
+    );
+  }
+
+  // Check if active parent account is locked / frozen due to unpaid SPP starting from 1st of month
+  const activeLockStatus = (currentUser.role === 'wali_murid')
+    ? checkAccountLockStatus(currentUser, invoices)
+    : null;
+
+  if (activeLockStatus?.isLocked) {
+    return (
+      <>
+        <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4">
+          <div className="bg-white p-8 rounded-3xl max-w-md w-full text-center space-y-4 border-2 border-rose-300 shadow-2xl">
+            <div className="w-16 h-16 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto text-2xl font-black">
+              🔒
+            </div>
+            <div>
+              <h2 className="text-lg font-black text-slate-900 font-display">
+                Akun Terkunci Otomatis (SPP Belum Bayar)
+              </h2>
+              <p className="text-xs text-rose-700 font-medium mt-1 leading-relaxed">
+                Mulai tanggal 1 tiap bulannya, hak akses masuk akun wali murid terkunci otomatis karena terdapat tagihan SPP ananda yang belum diselesaikan.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowActiveFrozenPopup(true)}
+              className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-black text-xs uppercase tracking-wider shadow-lg cursor-pointer"
+            >
+              Bayar / Unggah Bukti Bayar Sekarang
+            </button>
+            <button
+              onClick={logout}
+              className="w-full py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer"
+            >
+              Keluar (Logout)
+            </button>
+          </div>
+        </div>
+
+        <AccountFrozenModal
+          isOpen={showActiveFrozenPopup}
+          onClose={() => setShowActiveFrozenPopup(false)}
+          lockStatus={activeLockStatus}
+          onPaymentSuccess={() => {
+            setShowActiveFrozenPopup(false);
+          }}
         />
       </>
     );

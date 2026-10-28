@@ -1,14 +1,20 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserAccount, UserRole } from '../types';
+import { checkAccountLockStatus, AccountLockStatus, DEFAULT_ROLE_PERMISSIONS } from '../lib/accountLockService';
 
 interface AuthContextType {
   currentUser: UserAccount | null;
   isAuthenticated: boolean;
   accounts: UserAccount[];
-  login: (username: string, password: string) => { success: boolean; error?: string };
+  login: (username: string, password: string) => { success: boolean; error?: string; isLocked?: boolean; lockStatus?: AccountLockStatus };
   logout: () => void;
   createOrUpdateAccount: (account: Omit<UserAccount, 'id' | 'createdAt'> & { id?: string }) => UserAccount;
   deleteAccount: (id: string) => void;
+  toggleAccountFreeze: (id: string, isFrozen: boolean, reason?: string) => void;
+  updateAccountPermissions: (id: string, permissions: string[]) => void;
+  checkLock: (account: UserAccount) => AccountLockStatus;
+  directLoginAs: (account: UserAccount) => void;
+  resetAccountsToDefault: () => void;
   availableRoles: { role: UserRole; label: string; description: string }[];
 }
 
@@ -111,6 +117,17 @@ export const INITIAL_ACCOUNTS: UserAccount[] = [
     createdAt: '2026-01-01'
   },
   {
+    id: 'acc-parent-mikha',
+    username: 'wali.mikha',
+    password: '12345',
+    name: 'Ibu Larasati (Bunda Mikha)',
+    role: 'wali_murid',
+    email: 'larasati.kurnia@gmail.com',
+    childStudentId: 'std-004',
+    avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
+    createdAt: '2026-01-01'
+  },
+  {
     id: 'acc-applicant-rayyan',
     username: 'calon.rayyan',
     password: '12345',
@@ -142,16 +159,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const saved = localStorage.getItem('ls_user_accounts');
     if (saved) {
       try {
-        const parsed = JSON.parse(saved);
-        // Ensure super admin exists with username: admin and password: 12345
-        const hasAdmin = parsed.some((a: UserAccount) => a.username === 'admin');
-        if (!hasAdmin) {
-          return [INITIAL_ACCOUNTS[0], ...parsed];
+        const parsed: UserAccount[] = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Deduplicate by ID to eliminate any legacy duplicate entries
+          const seenIds = new Set<string>();
+          const cleanList: UserAccount[] = [];
+          for (const acc of parsed) {
+            if (acc && acc.id && !seenIds.has(acc.id)) {
+              seenIds.add(acc.id);
+              cleanList.push(acc);
+            }
+          }
+
+          // Ensure at least one super admin exists so the user never gets locked out
+          if (!cleanList.some(a => a.role === 'super_admin')) {
+            cleanList.unshift(INITIAL_ACCOUNTS[0]);
+          }
+
+          return cleanList;
         }
-        return parsed;
       } catch (e) {
-        return INITIAL_ACCOUNTS;
+        console.error('Failed to parse ls_user_accounts', e);
       }
+    }
+
+    // First run: save INITIAL_ACCOUNTS to localStorage
+    try {
+      localStorage.setItem('ls_user_accounts', JSON.stringify(INITIAL_ACCOUNTS));
+    } catch (e) {
+      // ignore
     }
     return INITIAL_ACCOUNTS;
   });
@@ -165,23 +201,59 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return null;
       }
     }
-    // Default: start at login page (currentUser is null)
+    // Default: start at landing/login page
     return null;
   });
 
+  // Listen to cross-tab storage changes for real-time automatic synchronization
   useEffect(() => {
-    localStorage.setItem('ls_user_accounts', JSON.stringify(accounts));
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'ls_user_accounts' && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setAccounts(parsed);
+          }
+        } catch {
+          // ignore
+        }
+      }
+      if (e.key === 'ls_current_user') {
+        try {
+          setCurrentUser(e.newValue ? JSON.parse(e.newValue) : null);
+        } catch {
+          // ignore
+        }
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ls_user_accounts', JSON.stringify(accounts));
+    } catch (e) {
+      console.error(e);
+    }
   }, [accounts]);
 
   useEffect(() => {
     if (currentUser) {
-      localStorage.setItem('ls_current_user', JSON.stringify(currentUser));
+      try {
+        localStorage.setItem('ls_current_user', JSON.stringify(currentUser));
+      } catch (e) {
+        console.error(e);
+      }
     } else {
       localStorage.removeItem('ls_current_user');
     }
   }, [currentUser]);
 
-  const login = (usernameInput: string, passwordInput: string): { success: boolean; error?: string } => {
+  const login = (
+    usernameInput: string, 
+    passwordInput: string
+  ): { success: boolean; error?: string; isLocked?: boolean; lockStatus?: AccountLockStatus } => {
     const cleanUsername = usernameInput.trim().toLowerCase();
     const cleanPassword = passwordInput.trim();
 
@@ -191,6 +263,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 
     if (account) {
+      // Check if account is frozen / locked (SPP unpaid from 1st of month or manual admin freeze)
+      const lockStatus = checkAccountLockStatus(account);
+      if (lockStatus.isLocked) {
+        return {
+          success: false,
+          isLocked: true,
+          lockStatus,
+          error: lockStatus.reason
+        };
+      }
+
       setCurrentUser(account);
       return { success: true };
     }
@@ -206,40 +289,192 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('ls_current_user');
   };
 
+  const directLoginAs = (account: UserAccount) => {
+    setCurrentUser(account);
+  };
+
+  const checkLock = (account: UserAccount): AccountLockStatus => {
+    return checkAccountLockStatus(account);
+  };
+
+  const toggleAccountFreeze = (id: string, isFrozen: boolean, reason?: string) => {
+    let targetAcc: UserAccount | undefined;
+    setAccounts(prev => {
+      const updated = prev.map(acc => {
+        if (acc.id === id) {
+          targetAcc = {
+            ...acc,
+            isFrozen,
+            freezeReason: isFrozen ? (reason || 'Dibekukan oleh Super Admin.') : undefined,
+            status: isFrozen ? ('frozen' as const) : ('active' as const)
+          };
+          return targetAcc;
+        }
+        return acc;
+      });
+      try {
+        localStorage.setItem('ls_user_accounts', JSON.stringify(updated));
+      } catch (e) {
+        console.error(e);
+      }
+      return updated;
+    });
+
+    // Auto-update currentUser if applicable
+    setCurrentUser(prev => {
+      if (prev && prev.id === id && targetAcc) {
+        const nextUser = { ...prev, ...targetAcc };
+        try {
+          localStorage.setItem('ls_current_user', JSON.stringify(nextUser));
+        } catch (e) {
+          console.error(e);
+        }
+        return nextUser;
+      }
+      return prev;
+    });
+  };
+
+  const updateAccountPermissions = (id: string, permissions: string[]) => {
+    let targetAcc: UserAccount | undefined;
+    setAccounts(prev => {
+      const updated = prev.map(acc => {
+        if (acc.id === id) {
+          targetAcc = {
+            ...acc,
+            customPermissions: permissions
+          };
+          return targetAcc;
+        }
+        return acc;
+      });
+      try {
+        localStorage.setItem('ls_user_accounts', JSON.stringify(updated));
+      } catch (e) {
+        console.error(e);
+      }
+      return updated;
+    });
+
+    // Auto-update currentUser if applicable
+    setCurrentUser(prev => {
+      if (prev && prev.id === id && targetAcc) {
+        const nextUser = { ...prev, ...targetAcc };
+        try {
+          localStorage.setItem('ls_current_user', JSON.stringify(nextUser));
+        } catch (e) {
+          console.error(e);
+        }
+        return nextUser;
+      }
+      return prev;
+    });
+  };
+
   const createOrUpdateAccount = (
     accountData: Omit<UserAccount, 'id' | 'createdAt'> & { id?: string }
   ): UserAccount => {
+    const cleanUsername = accountData.username.trim().toLowerCase();
     let savedAcc: UserAccount;
+
     setAccounts((prev) => {
-      // Check if existing by ID or username
-      const existingIdx = prev.findIndex(
-        (a) => (accountData.id && a.id === accountData.id) || a.username.toLowerCase() === accountData.username.toLowerCase()
-      );
+      // Find existing account by ID, staffId, childStudentId, or username
+      const existingIdx = prev.findIndex((a) => {
+        if (accountData.id && a.id === accountData.id) return true;
+        if (accountData.staffId && a.staffId === accountData.staffId) return true;
+        if (accountData.childStudentId && a.childStudentId === accountData.childStudentId) return true;
+        if (a.username.toLowerCase() === cleanUsername) return true;
+        return false;
+      });
 
       if (existingIdx >= 0) {
+        const existing = prev[existingIdx];
         savedAcc = {
-          ...prev[existingIdx],
+          ...existing,
           ...accountData,
-          id: prev[existingIdx].id
+          username: cleanUsername,
+          id: existing.id,
+          createdAt: existing.createdAt || new Date().toISOString().split('T')[0],
+          customPermissions: accountData.customPermissions ?? existing.customPermissions ?? DEFAULT_ROLE_PERMISSIONS[accountData.role] ?? []
         };
         const updated = [...prev];
         updated[existingIdx] = savedAcc;
+        try {
+          localStorage.setItem('ls_user_accounts', JSON.stringify(updated));
+        } catch (e) {
+          console.error(e);
+        }
         return updated;
       } else {
+        const newId = accountData.id || `acc-${Date.now().toString().slice(-6)}`;
         savedAcc = {
           ...accountData,
-          id: accountData.id || `acc-${Date.now().toString().slice(-4)}`,
-          createdAt: new Date().toISOString().split('T')[0]
+          username: cleanUsername,
+          id: newId,
+          createdAt: new Date().toISOString().split('T')[0],
+          customPermissions: accountData.customPermissions || DEFAULT_ROLE_PERMISSIONS[accountData.role] || []
         };
-        return [savedAcc, ...prev];
+        const updated = [savedAcc, ...prev];
+        try {
+          localStorage.setItem('ls_user_accounts', JSON.stringify(updated));
+        } catch (e) {
+          console.error(e);
+        }
+        return updated;
       }
+    });
+
+    // Automatically synchronize currentUser if the modified account is the currently logged-in user
+    setCurrentUser((prevUser) => {
+      if (!prevUser) return null;
+      if (
+        (savedAcc && prevUser.id === savedAcc.id) ||
+        (accountData.id && prevUser.id === accountData.id) ||
+        prevUser.username.toLowerCase() === cleanUsername ||
+        (accountData.staffId && prevUser.staffId === accountData.staffId) ||
+        (accountData.childStudentId && prevUser.childStudentId === accountData.childStudentId)
+      ) {
+        const updatedUser = { ...prevUser, ...savedAcc };
+        try {
+          localStorage.setItem('ls_current_user', JSON.stringify(updatedUser));
+        } catch (e) {
+          console.error(e);
+        }
+        return updatedUser;
+      }
+      return prevUser;
     });
 
     return savedAcc!;
   };
 
   const deleteAccount = (id: string) => {
-    setAccounts((prev) => prev.filter((a) => a.id !== id));
+    setAccounts((prev) => {
+      const updated = prev.filter((a) => a.id !== id);
+      try {
+        localStorage.setItem('ls_user_accounts', JSON.stringify(updated));
+      } catch (e) {
+        console.error(e);
+      }
+      return updated;
+    });
+
+    setCurrentUser((prevUser) => {
+      if (prevUser && prevUser.id === id) {
+        localStorage.removeItem('ls_current_user');
+        return null;
+      }
+      return prevUser;
+    });
+  };
+
+  const resetAccountsToDefault = () => {
+    setAccounts(INITIAL_ACCOUNTS);
+    try {
+      localStorage.setItem('ls_user_accounts', JSON.stringify(INITIAL_ACCOUNTS));
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   return (
@@ -252,6 +487,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         logout,
         createOrUpdateAccount,
         deleteAccount,
+        toggleAccountFreeze,
+        updateAccountPermissions,
+        checkLock,
+        directLoginAs,
+        resetAccountsToDefault,
         availableRoles: ROLE_LIST
       }}
     >

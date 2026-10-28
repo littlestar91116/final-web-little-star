@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Logo } from '../common/Logo';
+import { AccountFrozenModal } from './AccountFrozenModal';
+import { AccountLockStatus } from '../../lib/accountLockService';
 
 export const LoginPage: React.FC = () => {
   const { login, accounts } = useAuth();
@@ -25,6 +27,8 @@ export const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showFrozenModal, setShowFrozenModal] = useState(false);
+  const [frozenModalData, setFrozenModalData] = useState<AccountLockStatus | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +44,12 @@ export const LoginPage: React.FC = () => {
     setTimeout(() => {
       const res = login(username, password);
       if (!res.success) {
-        setErrorMsg(res.error || 'Username atau password salah.');
+        if (res.isLocked && res.lockStatus) {
+          setFrozenModalData(res.lockStatus);
+          setShowFrozenModal(true);
+        } else {
+          setErrorMsg(res.error || 'Username atau password salah.');
+        }
         setLoading(false);
       }
     }, 250);
@@ -53,7 +62,8 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 flex flex-col justify-center items-center p-4 sm:p-6 lg:p-8 font-sans selection:bg-amber-400 selection:text-amber-950">
+    <>
+      <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 flex flex-col justify-center items-center p-4 sm:p-6 lg:p-8 font-sans selection:bg-amber-400 selection:text-amber-950">
       {/* Dynamic Animated Ambient Luxury Lighting Orbs */}
       <motion.div 
         animate={{ 
@@ -205,13 +215,63 @@ export const LoginPage: React.FC = () => {
             </motion.button>
           </form>
 
-          {/* Admin Managed Account Notice */}
-          <div className="mt-5 pt-4 border-t border-slate-100 flex items-center gap-2 text-[11px] text-slate-500">
-            <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>Akun login dikelola langsung oleh Super Admin (Sistem Mandiri Little Star).</span>
+            {/* Quick Testing Badges */}
+            <div className="mt-4 pt-3 border-t border-slate-100 space-y-1.5">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block text-center">
+                Akun Uji Coba Cepat:
+              </span>
+              {(() => {
+                const adminAcc = accounts.find(a => a.role === 'super_admin');
+                const dylanAcc = accounts.find(a => a.username === 'wali.dylan' || a.childStudentId === 'std-001') || accounts.find(a => a.role === 'wali_murid' && !a.isFrozen);
+                const mikhaAcc = accounts.find(a => a.username === 'wali.mikha' || a.childStudentId === 'std-004') || accounts.find(a => a.role === 'wali_murid' && a.id !== dylanAcc?.id);
+
+                return (
+                  <div className="flex flex-wrap items-center justify-center gap-1.5 text-[10px]">
+                    <button
+                      type="button"
+                      onClick={() => handleQuickFill(adminAcc?.username || 'admin', adminAcc?.password || '12345')}
+                      className="px-2 py-1 rounded-lg bg-purple-50 text-purple-800 hover:bg-purple-100 font-bold border border-purple-200 cursor-pointer"
+                    >
+                      Super Admin ({adminAcc?.username || 'admin'})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleQuickFill(dylanAcc?.username || 'wali.dylan', dylanAcc?.password || '12345')}
+                      className="px-2 py-1 rounded-lg bg-emerald-50 text-emerald-800 hover:bg-emerald-100 font-bold border border-emerald-200 cursor-pointer"
+                    >
+                      Wali Dylan ({dylanAcc?.username || 'wali.dylan'})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleQuickFill(mikhaAcc?.username || 'wali.mikha', mikhaAcc?.password || '12345')}
+                      className="px-2 py-1 rounded-lg bg-rose-50 text-rose-800 hover:bg-rose-100 font-bold border border-rose-200 cursor-pointer flex items-center gap-1"
+                    >
+                      <Lock className="w-2.5 h-2.5 text-rose-600" />
+                      Wali Mikha ({mikhaAcc?.username || 'wali.mikha'})
+                    </button>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Admin Managed Account Notice */}
+            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2 text-[11px] text-slate-500">
+              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>Akun login dikelola langsung oleh Super Admin (Sistem Mandiri Little Star).</span>
+            </div>
           </div>
-        </div>
-      </motion.div>
-    </div>
+        </motion.div>
+      </div>
+
+      {/* Account Frozen Popup for Unpaid SPP starting from 1st of month */}
+      <AccountFrozenModal
+        isOpen={showFrozenModal}
+        onClose={() => setShowFrozenModal(false)}
+        lockStatus={frozenModalData}
+        onPaymentSuccess={() => {
+          setShowFrozenModal(false);
+        }}
+      />
+    </>
   );
 };

@@ -22,6 +22,10 @@ export interface UserAccount {
   childStudentId?: string; // if role is wali_murid
   staffId?: string; // if teacher/staff
   createdAt: string;
+  isFrozen?: boolean; // manual or administrative freeze
+  freezeReason?: string; // reason for freeze
+  customPermissions?: string[]; // module IDs this user can access
+  status?: 'active' | 'frozen' | 'suspended';
 }
 
 export interface UserProfile {
