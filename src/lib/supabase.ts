@@ -82,15 +82,112 @@ CREATE TABLE IF NOT EXISTS roles (
   description TEXT
 );
 
+INSERT INTO roles (id, name, description) VALUES
+  ('super_admin', 'Super Admin', 'Akses penuh seluruh konfigurasi, database, & kelola akun'),
+  ('admin_sekolah', 'Admin Sekolah', 'Pendaftaran PSB, data siswa, penugasan & operasional'),
+  ('kepala_sekolah', 'Kepala Sekolah', 'Supervisi guru, review rapor, approval program & kasus'),
+  ('guru_sekolah_pagi', 'Guru Sekolah Pagi', 'Jadwal kelas, tugas harian, lesson plan & asesmen'),
+  ('terapis', 'Terapis', 'Sesi terapi, target wicara/okupasi, rekam SDR'),
+  ('shadow_teacher', 'Shadow Teacher', 'Pendampingan khusus 1-on-1 & observasi adaptasi kelas'),
+  ('daycare_teacher', 'DayCare Teacher', 'Pengasuhan, aktivitas harian, makan & istirahat'),
+  ('staff_keuangan', 'Staff Keuangan', 'Kelola SPP 4 program & verifikasi transfer pembayaran'),
+  ('wali_murid', 'Wali Murid', 'Portal orang tua, rapor, perkembangan anak & tagihan SPP'),
+  ('calon_wali_murid', 'Calon Wali Murid', 'Formulir PSB online, upload berkas & booking observasi')
+ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  description = EXCLUDED.description;
+
 CREATE TABLE IF NOT EXISTS profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  username TEXT UNIQUE,
   full_name TEXT NOT NULL,
   role_id TEXT REFERENCES roles(id) DEFAULT 'wali_murid',
+  email TEXT,
   phone TEXT,
   avatar_url TEXT,
+  status TEXT DEFAULT 'active' CHECK (status IN ('active', 'frozen', 'suspended')),
+  freeze_reason TEXT,
+  staff_id TEXT,
+  child_student_id TEXT,
+  custom_permissions JSONB DEFAULT '[]'::jsonb,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Index profiles
+CREATE INDEX IF NOT EXISTS idx_profiles_username ON profiles (LOWER(username));
+CREATE INDEX IF NOT EXISTS idx_profiles_email ON profiles (LOWER(email));
+CREATE INDEX IF NOT EXISTS idx_profiles_role ON profiles (role_id);
+CREATE INDEX IF NOT EXISTS idx_profiles_status ON profiles (status);
+
+-- Triggers untuk sinkronisasi otomatis auth.users -> public.profiles
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_role TEXT;
+  v_full_name TEXT;
+  v_username TEXT;
+BEGIN
+  v_role := COALESCE(NEW.raw_app_meta_data->>'role', NEW.raw_user_meta_data->>'role', 'wali_murid');
+  IF NOT EXISTS (SELECT 1 FROM public.roles WHERE id = v_role) THEN
+    v_role := 'wali_murid';
+  END IF;
+  
+  v_full_name := COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'name', SPLIT_PART(COALESCE(NEW.email, 'User'), '@', 1));
+  v_username := COALESCE(NEW.raw_user_meta_data->>'username', SPLIT_PART(COALESCE(NEW.email, 'user'), '@', 1));
+
+  INSERT INTO public.profiles (
+    id, email, username, full_name, role_id, phone, avatar_url, status, staff_id, child_student_id, custom_permissions
+  )
+  VALUES (
+    NEW.id, NEW.email, LOWER(v_username), v_full_name, v_role,
+    NEW.raw_user_meta_data->>'phone',
+    COALESCE(NEW.raw_user_meta_data->>'avatar_url', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'),
+    COALESCE(NEW.raw_user_meta_data->>'status', 'active'),
+    NEW.raw_user_meta_data->>'staff_id',
+    NEW.raw_user_meta_data->>'child_student_id',
+    COALESCE(NEW.raw_user_meta_data->'custom_permissions', '[]'::jsonb)
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    email = EXCLUDED.email,
+    full_name = COALESCE(NULLIF(EXCLUDED.full_name, ''), public.profiles.full_name),
+    updated_at = NOW();
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+CREATE OR REPLACE FUNCTION public.handle_user_email_updated()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF OLD.email IS DISTINCT FROM NEW.email THEN
+    UPDATE public.profiles
+    SET email = NEW.email, updated_at = NOW()
+    WHERE id = NEW.id;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_email_updated ON auth.users;
+CREATE TRIGGER on_auth_user_email_updated
+  AFTER UPDATE OF email ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_user_email_updated();
+
+CREATE OR REPLACE FUNCTION public.is_super_admin()
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE id = auth.uid() AND role_id = 'super_admin'
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 CREATE TABLE IF NOT EXISTS user_roles (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -551,8 +648,35 @@ ALTER TABLE students ENABLE ROW LEVEL SECURITY;
 ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE student_cases ENABLE ROW LEVEL SECURITY;
 
--- SAMPLE INITIAL POLICIES
-CREATE POLICY "Public profiles can be viewed by authenticated users" ON profiles FOR SELECT TO authenticated USING (true);
+-- ROW LEVEL SECURITY (RLS) POLICIES ON PROFILES
+DROP POLICY IF EXISTS "Public profiles can be viewed by authenticated users" ON profiles;
+DROP POLICY IF EXISTS "Authenticated users can read profiles" ON profiles;
+DROP POLICY IF EXISTS "Users can read own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can update own profile non-role" ON profiles;
+DROP POLICY IF EXISTS "Super admin can do everything on profiles" ON profiles;
+
+CREATE POLICY "Authenticated users can read profiles"
+  ON profiles FOR SELECT
+  TO authenticated
+  USING (true);
+
+CREATE POLICY "Users can update own profile non-role"
+  ON profiles FOR UPDATE
+  TO authenticated
+  USING (auth.uid() = id)
+  WITH CHECK (
+    auth.uid() = id
+    AND role_id = (SELECT p.role_id FROM profiles p WHERE p.id = auth.uid())
+    AND status = (SELECT p.status FROM profiles p WHERE p.id = auth.uid())
+  );
+
+CREATE POLICY "Super admin can do everything on profiles"
+  ON profiles FOR ALL
+  TO authenticated
+  USING (public.is_super_admin())
+  WITH CHECK (public.is_super_admin());
+
+-- SAMPLE INITIAL POLICIES ON STUDENTS
 CREATE POLICY "Parents view own children" ON students FOR SELECT TO authenticated USING (
   EXISTS (
     SELECT 1 FROM student_guardians sg 

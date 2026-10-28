@@ -42,7 +42,7 @@ import { SiteSettingsProvider } from './context/SiteSettingsContext';
 import { LogoIntroBackground } from './components/common/LogoIntroBackground';
 
 const MainLayout: React.FC = () => {
-  const { currentUser, isAuthenticated, logout } = useAuth();
+  const { currentUser, isAuthenticated, isLoading, authError, logout } = useAuth();
   const { invoices } = useSchoolData();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [supabaseModalOpen, setSupabaseModalOpen] = useState(false);
@@ -50,11 +50,33 @@ const MainLayout: React.FC = () => {
   const [activeModule, setActiveModule] = useState('dashboard');
   const [showActiveFrozenPopup, setShowActiveFrozenPopup] = useState(true);
 
+  // Wait for session restoration from Supabase Auth / storage to prevent redirect loops or flickering
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 selection:bg-amber-400 selection:text-amber-950">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-14 h-14 rounded-3xl bg-gradient-to-tr from-amber-400 to-yellow-500 flex items-center justify-center animate-bounce shadow-xl shadow-amber-500/30 border border-amber-300">
+            <span className="text-slate-950 font-black text-2xl">★</span>
+          </div>
+          <div className="text-center space-y-1">
+            <p className="text-sm font-black text-amber-300 tracking-wider font-display uppercase">LITTLE STAR LEARNING CENTER</p>
+            <p className="text-xs text-slate-400 font-medium">Memulihkan sesi akun & sinkronisasi data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // If not logged in, render the animated Gallery Landing Page as the initial entry point.
   // The Login button is placed in the top right, opening the LoginModal popup!
   if (!isAuthenticated || !currentUser) {
     return (
       <>
+        {authError && (
+          <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-rose-900/90 text-white border border-rose-500 px-4 py-2.5 rounded-2xl text-xs font-semibold shadow-2xl backdrop-blur-md">
+            {authError}
+          </div>
+        )}
         <GalleryLandingPage 
           onOpenLogin={() => setLoginModalOpen(true)} 
         />

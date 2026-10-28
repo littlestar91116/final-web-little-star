@@ -13,7 +13,7 @@ export type UserRole =
 export interface UserAccount {
   id: string;
   username: string;
-  password: string;
+  password?: string;
   name: string;
   role: UserRole;
   email?: string;

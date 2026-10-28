@@ -78,6 +78,8 @@ export const UsersModule: React.FC = () => {
   const [showPlainPassword, setShowPlainPassword] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState('');
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -126,7 +128,7 @@ export const UsersModule: React.FC = () => {
   const handleOpenAdd = () => {
     setEditingAccount(null);
     setFormUsername('');
-    setFormPassword('12345');
+    setFormPassword('123456');
     setFormName('');
     setFormRole('guru_sekolah_pagi');
     setFormEmail('');
@@ -137,6 +139,7 @@ export const UsersModule: React.FC = () => {
     setFormFreezeReason('');
     setFormPermissions(DEFAULT_ROLE_PERMISSIONS['guru_sekolah_pagi'] || []);
     setActiveFormTab('info');
+    setFormError('');
     setShowAddEditModal(true);
   };
 
@@ -144,7 +147,7 @@ export const UsersModule: React.FC = () => {
   const handleOpenEdit = (acc: UserAccount) => {
     setEditingAccount(acc);
     setFormUsername(acc.username);
-    setFormPassword(acc.password);
+    setFormPassword('');
     setFormName(acc.name);
     setFormRole(acc.role);
     setFormEmail(acc.email || '');
@@ -174,6 +177,7 @@ export const UsersModule: React.FC = () => {
         : DEFAULT_ROLE_PERMISSIONS[acc.role] || []
     );
     setActiveFormTab('info');
+    setFormError('');
     setShowAddEditModal(true);
   };
 
@@ -204,10 +208,22 @@ export const UsersModule: React.FC = () => {
   };
 
   // Save Account
-  const handleSaveAccount = (e: React.FormEvent) => {
+  const handleSaveAccount = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formUsername.trim() || !formPassword.trim() || !formName.trim()) {
-      alert('Mohon isi nama lengkap, username, dan password.');
+    setFormError('');
+
+    if (!formUsername.trim() || !formName.trim()) {
+      setFormError('Mohon isi nama lengkap dan username.');
+      return;
+    }
+
+    if (!editingAccount && (!formPassword.trim() || formPassword.trim().length < 6)) {
+      setFormError('Password baru wajib diisi minimal 6 karakter untuk keamanan sistem Supabase Auth.');
+      return;
+    }
+
+    if (editingAccount && formPassword.trim() && formPassword.trim().length < 6) {
+      setFormError('Jika mengubah password, panjang minimal harus 6 karakter.');
       return;
     }
 
@@ -216,47 +232,55 @@ export const UsersModule: React.FC = () => {
       a => a.username.toLowerCase() === cleanUsername && (!editingAccount || a.id !== editingAccount.id)
     );
     if (conflictAcc) {
-      alert(`Username "${cleanUsername}" sudah digunakan oleh akun "${conflictAcc.name}". Silakan gunakan username lain.`);
+      setFormError(`Username "${cleanUsername}" sudah digunakan oleh akun "${conflictAcc.name}". Silakan gunakan username lain.`);
       return;
     }
 
-    createOrUpdateAccount({
-      id: editingAccount?.id,
-      username: cleanUsername,
-      password: formPassword.trim(),
-      name: formName.trim(),
-      role: formRole,
-      email: formEmail.trim() || undefined,
-      phone: formPhone.trim() || undefined,
-      childStudentId: formRole === 'wali_murid' ? (formChildId || undefined) : undefined,
-      staffId: formRole !== 'wali_murid' && formRole !== 'calon_wali_murid' ? (formStaffId || undefined) : undefined,
-      isFrozen: formIsFrozen,
-      freezeReason: formIsFrozen ? formFreezeReason : undefined,
-      status: formIsFrozen ? 'frozen' : 'active',
-      customPermissions: formPermissions,
-      avatarUrl: editingAccount?.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
-    });
+    setIsSubmitting(true);
 
-    // Automatically synchronize student profile if wali_murid
-    if (formRole === 'wali_murid' && formChildId) {
-      updateStudent(formChildId, {
-        accountUsername: cleanUsername,
-        accountPassword: formPassword.trim()
-      });
-    }
-
-    // Automatically synchronize staff profile if linked to staff
-    if (formStaffId) {
-      updateStaff(formStaffId, {
-        accountUsername: cleanUsername,
-        accountPassword: formPassword.trim(),
+    try {
+      await createOrUpdateAccount({
+        id: editingAccount?.id,
+        username: cleanUsername,
+        password: formPassword.trim() || undefined,
         name: formName.trim(),
-        role: formRole
+        role: formRole,
+        email: formEmail.trim() || undefined,
+        phone: formPhone.trim() || undefined,
+        childStudentId: formRole === 'wali_murid' ? (formChildId || undefined) : undefined,
+        staffId: formRole !== 'wali_murid' && formRole !== 'calon_wali_murid' ? (formStaffId || undefined) : undefined,
+        isFrozen: formIsFrozen,
+        freezeReason: formIsFrozen ? formFreezeReason : undefined,
+        status: formIsFrozen ? 'frozen' : 'active',
+        customPermissions: formPermissions,
+        avatarUrl: editingAccount?.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
       });
-    }
 
-    setShowAddEditModal(false);
-    showToast(`Akun ${cleanUsername} berhasil ${editingAccount ? 'diperbarui hak aksesnya' : 'dibuat'}! Data tersimpan & update otomatis.`);
+      // Automatically synchronize student profile if wali_murid
+      if (formRole === 'wali_murid' && formChildId) {
+        updateStudent(formChildId, {
+          accountUsername: cleanUsername,
+          ...(formPassword.trim() ? { accountPassword: formPassword.trim() } : {})
+        });
+      }
+
+      // Automatically synchronize staff profile if linked to staff
+      if (formStaffId) {
+        updateStaff(formStaffId, {
+          accountUsername: cleanUsername,
+          ...(formPassword.trim() ? { accountPassword: formPassword.trim() } : {}),
+          name: formName.trim(),
+          role: formRole
+        });
+      }
+
+      setShowAddEditModal(false);
+      showToast(`Akun ${cleanUsername} berhasil ${editingAccount ? 'diperbarui hak aksesnya' : 'dibuat'}! Data tersimpan & update otomatis.`);
+    } catch (err: any) {
+      setFormError(err?.message || 'Terjadi kegagalan saat menyimpan akun ke database.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Quick Freeze Toggle
@@ -541,15 +565,17 @@ export const UsersModule: React.FC = () => {
                       <td className="py-3.5 px-4 font-mono text-slate-600">
                         <div className="flex items-center gap-1.5">
                           <span className="bg-slate-100 px-2 py-0.5 rounded text-[11px] border border-slate-200">
-                            {acc.password}
+                            {acc.password ? '••••••••' : 'Terenkripsi (Auth)'}
                           </span>
-                          <button
-                            onClick={() => handleCopyText(acc.password, `p-${acc.id}`)}
-                            className="text-slate-300 hover:text-slate-600 cursor-pointer"
-                            title="Salin password"
-                          >
-                            {copiedId === `p-${acc.id}` ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
-                          </button>
+                          {acc.password && (
+                            <button
+                              onClick={() => handleCopyText(acc.password || '', `p-${acc.id}`)}
+                              className="text-slate-300 hover:text-slate-600 cursor-pointer"
+                              title="Salin password sementara"
+                            >
+                              {copiedId === `p-${acc.id}` ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                            </button>
+                          )}
                         </div>
                       </td>
 
@@ -710,6 +736,12 @@ export const UsersModule: React.FC = () => {
             </div>
 
             <form onSubmit={handleSaveAccount} className="space-y-4">
+              {formError && (
+                <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5">
+                  <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                  <span className="font-semibold">{formError}</span>
+                </div>
+              )}
               {activeFormTab === 'info' ? (
                 <>
                   <div>
@@ -744,7 +776,7 @@ export const UsersModule: React.FC = () => {
                     <div>
                       <div className="flex items-center justify-between mb-1">
                         <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                          Password *
+                          Password {editingAccount ? '(Kosongkan jika tidak diubah)' : '* (Min. 6 Karakter)'}
                         </label>
                         <button
                           type="button"
@@ -757,8 +789,8 @@ export const UsersModule: React.FC = () => {
                       <div className="relative">
                         <input
                           type={showPlainPassword ? 'text' : 'password'}
-                          required
-                          placeholder="Password akun..."
+                          required={!editingAccount}
+                          placeholder={editingAccount ? 'Biarkan kosong untuk mempertahankan password lama' : 'Minimal 6 karakter...'}
                           value={formPassword}
                           onChange={(e) => setFormPassword(e.target.value)}
                           className="w-full pl-3.5 pr-10 py-2.5 border border-slate-300 rounded-xl text-xs font-mono text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50 focus:bg-white"
@@ -1002,9 +1034,17 @@ export const UsersModule: React.FC = () => {
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-2.5 text-xs font-black text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-md cursor-pointer uppercase tracking-wider"
+                    disabled={isSubmitting}
+                    className="px-6 py-2.5 text-xs font-black text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-md cursor-pointer uppercase tracking-wider disabled:opacity-60 flex items-center gap-1.5"
                   >
-                    {editingAccount ? 'Simpan Perubahan' : 'Buat Akun'}
+                    {isSubmitting ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <span>Menyimpan...</span>
+                      </>
+                    ) : (
+                      <span>{editingAccount ? 'Simpan Perubahan' : 'Buat Akun'}</span>
+                    )}
                   </button>
                 </div>
               </div>

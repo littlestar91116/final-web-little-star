@@ -30,19 +30,18 @@ export const LoginPage: React.FC = () => {
   const [showFrozenModal, setShowFrozenModal] = useState(false);
   const [frozenModalData, setFrozenModalData] = useState<AccountLockStatus | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
 
     if (!username.trim() || !password.trim()) {
-      setErrorMsg('Mohon masukkan username dan password Anda.');
+      setErrorMsg('Mohon masukkan username atau email dan password Anda.');
       return;
     }
 
     setLoading(true);
-    // Simulate natural latency for smooth feeling
-    setTimeout(() => {
-      const res = login(username, password);
+    try {
+      const res = await login(username, password);
       if (!res.success) {
         if (res.isLocked && res.lockStatus) {
           setFrozenModalData(res.lockStatus);
@@ -50,9 +49,12 @@ export const LoginPage: React.FC = () => {
         } else {
           setErrorMsg(res.error || 'Username atau password salah.');
         }
-        setLoading(false);
       }
-    }, 250);
+    } catch (err: any) {
+      setErrorMsg(err?.message || 'Terjadi kesalahan sistem saat mencoba masuk.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleQuickFill = (u: string, p: string) => {
@@ -154,7 +156,7 @@ export const LoginPage: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 font-display">
-                Username
+                Username atau Email
               </label>
               <div className="relative">
                 <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -163,7 +165,7 @@ export const LoginPage: React.FC = () => {
                   required
                   autoFocus
                   autoComplete="username"
-                  placeholder="Masukkan username Anda..."
+                  placeholder="Masukkan username atau email Anda..."
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-slate-300 text-xs text-slate-900 outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all font-medium bg-slate-50/50 focus:bg-white"
