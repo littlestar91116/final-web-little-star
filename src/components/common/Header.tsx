@@ -19,7 +19,7 @@ export const Header: React.FC<HeaderProps> = ({
   setActiveModule
 }) => {
   const { currentUser, logout } = useAuth();
-  const { notifications, markNotificationAsRead } = useSchoolData();
+  const { notifications, markNotificationAsRead, isSyncing } = useSchoolData();
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
 
@@ -146,18 +146,20 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={onOpenSupabaseModal}
             className={`hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 ${
               supabaseConfig.isConnected
-                ? 'bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-800 border-emerald-300 hover:shadow-emerald-500/20'
+                ? isSyncing 
+                  ? 'bg-amber-50 text-amber-800 border-amber-300' 
+                  : 'bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-800 border-emerald-300 hover:shadow-emerald-500/20'
                 : 'bg-white/80 text-slate-700 border-slate-200 hover:bg-slate-50'
             }`}
-            title="Konfigurasi Database Supabase"
+            title="Koneksi Supabase & Sinkronisasi Otomatis"
           >
             <span className="relative flex h-2 w-2">
-              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${supabaseConfig.isConnected ? 'bg-emerald-400' : 'bg-slate-400'}`}></span>
-              <span className={`relative inline-flex rounded-full h-2 w-2 ${supabaseConfig.isConnected ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
+              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${supabaseConfig.isConnected ? (isSyncing ? 'bg-amber-400' : 'bg-emerald-400') : 'bg-slate-400'}`}></span>
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${supabaseConfig.isConnected ? (isSyncing ? 'bg-amber-500' : 'bg-emerald-500') : 'bg-slate-400'}`}></span>
             </span>
-            <Database className="w-3.5 h-3.5 text-emerald-600" />
+            <Database className={`w-3.5 h-3.5 ${supabaseConfig.isConnected ? (isSyncing ? 'text-amber-600 animate-spin' : 'text-emerald-600') : 'text-slate-500'}`} />
             <span className="whitespace-nowrap">
-              {supabaseConfig.isConnected ? 'Supabase Aktif' : 'Setup Supabase'}
+              {supabaseConfig.isConnected ? (isSyncing ? 'Menyinkronkan...' : 'Auto-Sync Aktif') : 'Setup Supabase'}
             </span>
           </button>
 

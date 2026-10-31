@@ -736,6 +736,13 @@ ALTER TABLE admissions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE gallery ENABLE ROW LEVEL SECURITY;
 ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE student_cases ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE programs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE positions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE observation_slots ENABLE ROW LEVEL SECURITY;
+ALTER TABLE student_development_records ENABLE ROW LEVEL SECURITY;
+ALTER TABLE consultation_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE school_settings ENABLE ROW LEVEL SECURITY;
 
 -- ROW LEVEL SECURITY (RLS) POLICIES ON PROFILES
 DROP POLICY IF EXISTS "Public profiles can be viewed by authenticated users" ON profiles;
@@ -786,4 +793,25 @@ CREATE POLICY "Allow all for invoices" ON invoices FOR ALL TO authenticated, ano
 
 DROP POLICY IF EXISTS "Allow all for student_cases" ON student_cases;
 CREATE POLICY "Allow all for student_cases" ON student_cases FOR ALL TO authenticated, anon USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all for tasks" ON tasks;
+CREATE POLICY "Allow all for tasks" ON tasks FOR ALL TO authenticated, anon USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all for programs" ON programs;
+CREATE POLICY "Allow all for programs" ON programs FOR ALL TO authenticated, anon USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all for positions" ON positions;
+CREATE POLICY "Allow all for positions" ON positions FOR ALL TO authenticated, anon USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all for observation_slots" ON observation_slots;
+CREATE POLICY "Allow all for observation_slots" ON observation_slots FOR ALL TO authenticated, anon USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all for student_development_records" ON student_development_records;
+CREATE POLICY "Allow all for student_development_records" ON student_development_records FOR ALL TO authenticated, anon USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all for consultation_requests" ON consultation_requests;
+CREATE POLICY "Allow all for consultation_requests" ON consultation_requests FOR ALL TO authenticated, anon USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all for school_settings" ON school_settings;
+CREATE POLICY "Allow all for school_settings" ON school_settings FOR ALL TO authenticated, anon USING (true) WITH CHECK (true);
 `;

@@ -132,7 +132,99 @@ ALTER TABLE public.student_cases ADD COLUMN IF NOT EXISTS resolution_notes TEXT;
 ALTER TABLE public.student_cases ADD COLUMN IF NOT EXISTS resolved_at DATE;
 ALTER TABLE public.student_cases ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
 
--- 5. AKTIFKAN RLS DAN BUAT POLICIES AGAR FRONTEND BISA SIMPAN DAN BACA DATA
+-- 5. TAMBAHAN TABEL OPERASIONAL: TASKS, PROGRAMS, POSITIONS, OBSERVATION SLOTS, SDR, KONSULTASI, SETTINGS
+CREATE TABLE IF NOT EXISTS public.tasks (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+  teacher_id TEXT,
+  teacher_name TEXT,
+  program TEXT DEFAULT 'sekolah_pagi',
+  student_id TEXT,
+  student_name TEXT,
+  period TEXT DEFAULT 'mingguan',
+  deadline DATE,
+  status TEXT DEFAULT 'belum_dikerjakan',
+  submission_date DATE,
+  notes TEXT,
+  reviewer_notes TEXT,
+  media_count INT DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.programs (
+  id TEXT PRIMARY KEY,
+  code TEXT NOT NULL,
+  title TEXT NOT NULL,
+  short_desc TEXT,
+  schedule TEXT,
+  age_group TEXT,
+  points JSONB DEFAULT '[]'::jsonb,
+  spesial TEXT,
+  fee TEXT,
+  badge_color TEXT,
+  icon_name TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.positions (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  role_category TEXT NOT NULL,
+  description TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.observation_slots (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  date DATE NOT NULL,
+  time_slot TEXT NOT NULL,
+  assessor_name TEXT,
+  room TEXT,
+  capacity INT DEFAULT 3,
+  booked_count INT DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.student_development_records (
+  student_id TEXT PRIMARY KEY,
+  academic_year TEXT DEFAULT '2026/2027',
+  last_updated DATE,
+  summary_notes TEXT,
+  scores JSONB DEFAULT '[]'::jsonb,
+  program_decision TEXT DEFAULT 'CONTINUE',
+  decision_rationale TEXT,
+  principal_approval_date DATE,
+  planning_matrix JSONB DEFAULT '[]'::jsonb,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.consultation_requests (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  student_id TEXT,
+  student_name TEXT,
+  parent_name TEXT,
+  parent_phone TEXT,
+  target_role TEXT,
+  target_staff_name TEXT,
+  requested_date DATE,
+  preferred_time TEXT,
+  consultation_type TEXT,
+  topic TEXT,
+  notes TEXT,
+  status TEXT DEFAULT 'menunggu_konfirmasi',
+  feedback_notes TEXT,
+  confirmed_date DATE,
+  confirmed_time TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.school_settings (
+  id TEXT PRIMARY KEY DEFAULT 'current',
+  settings JSONB NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 6. AKTIFKAN RLS DAN BUAT POLICIES AGAR FRONTEND BISA SIMPAN DAN BACA DATA
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.students ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.staff ENABLE ROW LEVEL SECURITY;
@@ -141,6 +233,13 @@ ALTER TABLE public.admissions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.gallery ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.invoices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.student_cases ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.programs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.positions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.observation_slots ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.student_development_records ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.consultation_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.school_settings ENABLE ROW LEVEL SECURITY;
 
 -- Reset policies untuk menghindari error duplicate
 DROP POLICY IF EXISTS "Authenticated users can read profiles" ON public.profiles;
@@ -153,6 +252,13 @@ DROP POLICY IF EXISTS "Allow all for gallery" ON public.gallery;
 DROP POLICY IF EXISTS "Allow all for admissions" ON public.admissions;
 DROP POLICY IF EXISTS "Allow all for invoices" ON public.invoices;
 DROP POLICY IF EXISTS "Allow all for student_cases" ON public.student_cases;
+DROP POLICY IF EXISTS "Allow all for tasks" ON public.tasks;
+DROP POLICY IF EXISTS "Allow all for programs" ON public.programs;
+DROP POLICY IF EXISTS "Allow all for positions" ON public.positions;
+DROP POLICY IF EXISTS "Allow all for observation_slots" ON public.observation_slots;
+DROP POLICY IF EXISTS "Allow all for student_development_records" ON public.student_development_records;
+DROP POLICY IF EXISTS "Allow all for consultation_requests" ON public.consultation_requests;
+DROP POLICY IF EXISTS "Allow all for school_settings" ON public.school_settings;
 DROP POLICY IF EXISTS "Parents view own children" ON public.students;
 
 -- Profiles: baca untuk semua pengguna, update untuk diri sendiri & super admin
@@ -167,3 +273,10 @@ CREATE POLICY "Allow all for gallery" ON public.gallery FOR ALL TO authenticated
 CREATE POLICY "Allow all for admissions" ON public.admissions FOR ALL TO authenticated, anon USING (true) WITH CHECK (true);
 CREATE POLICY "Allow all for invoices" ON public.invoices FOR ALL TO authenticated, anon USING (true) WITH CHECK (true);
 CREATE POLICY "Allow all for student_cases" ON public.student_cases FOR ALL TO authenticated, anon USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all for tasks" ON public.tasks FOR ALL TO authenticated, anon USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all for programs" ON public.programs FOR ALL TO authenticated, anon USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all for positions" ON public.positions FOR ALL TO authenticated, anon USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all for observation_slots" ON public.observation_slots FOR ALL TO authenticated, anon USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all for student_development_records" ON public.student_development_records FOR ALL TO authenticated, anon USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all for consultation_requests" ON public.consultation_requests FOR ALL TO authenticated, anon USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all for school_settings" ON public.school_settings FOR ALL TO authenticated, anon USING (true) WITH CHECK (true);

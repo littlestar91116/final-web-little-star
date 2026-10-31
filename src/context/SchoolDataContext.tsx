@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { 
   Student, 
   StaffMember, 
@@ -46,16 +46,36 @@ import {
   fetchClassesFromSupabase,
   saveClassToSupabase,
   deleteClassFromSupabase,
+  fetchPositionsFromSupabase,
+  savePositionToSupabase,
+  deletePositionFromSupabase,
+  fetchProgramsFromSupabase,
+  saveProgramToSupabase,
+  deleteProgramFromSupabase,
   fetchAdmissionsFromSupabase,
   saveAdmissionToSupabase,
+  deleteAdmissionFromSupabase,
+  fetchObservationSlotsFromSupabase,
+  saveObservationSlotToSupabase,
+  fetchTasksFromSupabase,
+  saveTaskToSupabase,
+  deleteTaskFromSupabase,
+  fetchCasesFromSupabase,
+  saveCaseToSupabase,
+  deleteCaseFromSupabase,
+  fetchSDRFromSupabase,
+  saveSDRToSupabase,
+  fetchInvoicesFromSupabase,
+  saveInvoiceToSupabase,
+  deleteInvoiceFromSupabase,
   fetchGalleryFromSupabase,
   saveGalleryItemToSupabase,
   deleteGalleryItemFromSupabase,
-  fetchInvoicesFromSupabase,
-  saveInvoiceToSupabase,
-  fetchCasesFromSupabase,
-  saveCaseToSupabase,
-  generateUUID
+  fetchConsultationsFromSupabase,
+  saveConsultationToSupabase,
+  subscribeToAllChanges,
+  generateUUID,
+  toDeterministicUUID
 } from '../lib/supabaseSchoolService';
 
 interface SchoolDataContextType {
@@ -75,6 +95,7 @@ interface SchoolDataContextType {
   schedules: StudentScheduleItem[];
   attendance: StudentAttendanceItem[];
   consultations: ConsultationRequest[];
+  isSyncing: boolean;
 
   // Student Actions
   addStudent: (student: Omit<Student, 'id'> & { id?: string }) => string;
@@ -107,6 +128,7 @@ interface SchoolDataContextType {
   bookObservationSlot: (admissionId: string, slotId: string) => void;
   createObservationSlot: (slot: Omit<ObservationSlot, 'id' | 'bookedCount'>) => void;
   admitStudentFromAdmission: (admissionId: string, className: string) => void;
+  deleteAdmission?: (id: string) => void;
 
   // Task Actions
   addTask: (task: Omit<TeacherTask, 'id'>) => void;
@@ -138,11 +160,16 @@ interface SchoolDataContextType {
 
   // Notifications
   markNotificationAsRead: (id: string) => void;
+
+  // Manual Refresh
+  refreshAllData: () => Promise<void>;
 }
 
 const SchoolDataContext = createContext<SchoolDataContextType | undefined>(undefined);
 
 export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
+
   const [students, setStudents] = useState<Student[]>(() => {
     const saved = localStorage.getItem('ls_students');
     return saved ? JSON.parse(saved) : INITIAL_STUDENTS;
@@ -203,10 +230,6 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     return saved ? JSON.parse(saved) : INITIAL_GALLERY;
   });
 
-  useEffect(() => {
-    localStorage.setItem('ls_gallery', JSON.stringify(gallery));
-  }, [gallery]);
-
   const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
 
   const [schedules, setSchedules] = useState<StudentScheduleItem[]>(() => {
@@ -225,57 +248,99 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   });
 
   // Synchronize initial data from Supabase if connected
-  useEffect(() => {
-    async function loadSupabaseData() {
-      try {
-        const [
-          dbStudents, 
-          dbStaff, 
-          dbClasses, 
-          dbAdmissions, 
-          dbGallery, 
-          dbInvoices, 
-          dbCases
-        ] = await Promise.all([
-          fetchStudentsFromSupabase(),
-          fetchStaffFromSupabase(),
-          fetchClassesFromSupabase(),
-          fetchAdmissionsFromSupabase(),
-          fetchGalleryFromSupabase(),
-          fetchInvoicesFromSupabase(),
-          fetchCasesFromSupabase()
-        ]);
+  const loadSupabaseData = useCallback(async () => {
+    setIsSyncing(true);
+    try {
+      const [
+        dbStudents, 
+        dbStaff, 
+        dbClasses, 
+        dbPositions,
+        dbPrograms,
+        dbAdmissions, 
+        dbObsSlots,
+        dbTasks,
+        dbCases,
+        dbSdr,
+        dbInvoices, 
+        dbGallery, 
+        dbConsultations
+      ] = await Promise.all([
+        fetchStudentsFromSupabase(),
+        fetchStaffFromSupabase(),
+        fetchClassesFromSupabase(),
+        fetchPositionsFromSupabase(),
+        fetchProgramsFromSupabase(),
+        fetchAdmissionsFromSupabase(),
+        fetchObservationSlotsFromSupabase(),
+        fetchTasksFromSupabase(),
+        fetchCasesFromSupabase(),
+        fetchSDRFromSupabase(),
+        fetchInvoicesFromSupabase(),
+        fetchGalleryFromSupabase(),
+        fetchConsultationsFromSupabase()
+      ]);
 
-        if (dbStudents && dbStudents.length > 0) setStudents(dbStudents);
-        if (dbStaff && dbStaff.length > 0) setStaff(dbStaff);
-        if (dbClasses && dbClasses.length > 0) setClasses(dbClasses);
-        if (dbAdmissions && dbAdmissions.length > 0) setAdmissions(dbAdmissions);
-        if (dbGallery && dbGallery.length > 0) setGallery(dbGallery);
-        if (dbInvoices && dbInvoices.length > 0) setInvoices(dbInvoices);
-        if (dbCases && dbCases.length > 0) setCases(dbCases);
-      } catch (err) {
-        console.warn('Initial load from Supabase failed, using local cache:', err);
-      }
+      if (dbStudents && dbStudents.length > 0) setStudents(dbStudents);
+      if (dbStaff && dbStaff.length > 0) setStaff(dbStaff);
+      if (dbClasses && dbClasses.length > 0) setClasses(dbClasses);
+      if (dbPositions && dbPositions.length > 0) setPositions(dbPositions);
+      if (dbPrograms && dbPrograms.length > 0) setDetailedPrograms(dbPrograms);
+      if (dbAdmissions && dbAdmissions.length > 0) setAdmissions(dbAdmissions);
+      if (dbObsSlots && dbObsSlots.length > 0) setObservationSlots(dbObsSlots);
+      if (dbTasks && dbTasks.length > 0) setTasks(dbTasks);
+      if (dbCases && dbCases.length > 0) setCases(dbCases);
+      if (dbSdr && Object.keys(dbSdr).length > 0) setSdrRecords(dbSdr);
+      if (dbInvoices && dbInvoices.length > 0) setInvoices(dbInvoices);
+      if (dbGallery && dbGallery.length > 0) setGallery(dbGallery);
+      if (dbConsultations && dbConsultations.length > 0) setConsultations(dbConsultations);
+    } catch (err) {
+      console.warn('Initial load from Supabase failed, using local cache:', err);
+    } finally {
+      setIsSyncing(false);
     }
-
-    loadSupabaseData();
   }, []);
+
+  useEffect(() => {
+    loadSupabaseData();
+
+    // Setup Realtime Subscription so all tabs/users stay synchronized automatically
+    const unsubscribe = subscribeToAllChanges((table) => {
+      const managedTables = [
+        'students', 'staff', 'classes', 'positions', 'programs',
+        'admissions', 'observation_slots', 'tasks', 'student_cases',
+        'student_development_records', 'invoices', 'gallery', 'consultation_requests'
+      ];
+      if (managedTables.includes(table)) {
+        loadSupabaseData();
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [loadSupabaseData]);
 
   // Sync to local storage
   useEffect(() => {
-    localStorage.setItem('ls_schedules', JSON.stringify(schedules));
-  }, [schedules]);
-
-  useEffect(() => {
-    localStorage.setItem('ls_attendance', JSON.stringify(attendance));
-  }, [attendance]);
-
-  useEffect(() => {
-    localStorage.setItem('ls_consultations', JSON.stringify(consultations));
-  }, [consultations]);
-  useEffect(() => {
     localStorage.setItem('ls_students', JSON.stringify(students));
   }, [students]);
+
+  useEffect(() => {
+    localStorage.setItem('ls_staff', JSON.stringify(staff));
+  }, [staff]);
+
+  useEffect(() => {
+    localStorage.setItem('ls_classes', JSON.stringify(classes));
+  }, [classes]);
+
+  useEffect(() => {
+    localStorage.setItem('ls_positions', JSON.stringify(positions));
+  }, [positions]);
+
+  useEffect(() => {
+    localStorage.setItem('ls_programs', JSON.stringify(detailedPrograms));
+  }, [detailedPrograms]);
 
   useEffect(() => {
     localStorage.setItem('ls_admissions', JSON.stringify(admissions));
@@ -298,20 +363,24 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   }, [sdrRecords]);
 
   useEffect(() => {
-    localStorage.setItem('ls_staff', JSON.stringify(staff));
-  }, [staff]);
+    localStorage.setItem('ls_invoices', JSON.stringify(invoices));
+  }, [invoices]);
 
   useEffect(() => {
-    localStorage.setItem('ls_classes', JSON.stringify(classes));
-  }, [classes]);
+    localStorage.setItem('ls_gallery', JSON.stringify(gallery));
+  }, [gallery]);
 
   useEffect(() => {
-    localStorage.setItem('ls_positions', JSON.stringify(positions));
-  }, [positions]);
+    localStorage.setItem('ls_schedules', JSON.stringify(schedules));
+  }, [schedules]);
 
   useEffect(() => {
-    localStorage.setItem('ls_programs', JSON.stringify(detailedPrograms));
-  }, [detailedPrograms]);
+    localStorage.setItem('ls_attendance', JSON.stringify(attendance));
+  }, [attendance]);
+
+  useEffect(() => {
+    localStorage.setItem('ls_consultations', JSON.stringify(consultations));
+  }, [consultations]);
 
   // Student Actions
   const addStudent = (newStd: Omit<Student, 'id'> & { id?: string }): string => {
@@ -399,29 +468,49 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   // Position Actions
   const addPosition = (pos: Omit<JobPosition, 'id'>) => {
     const id = `pos-${Date.now().toString().slice(-4)}`;
-    setPositions(prev => [...prev, { ...pos, id }]);
+    const newPos: JobPosition = { ...pos, id };
+    setPositions(prev => [...prev, newPos]);
+    savePositionToSupabase(newPos);
   };
 
   const updatePosition = (id: string, data: Partial<JobPosition>) => {
-    setPositions(prev => prev.map(p => p.id === id ? { ...p, ...data } : p));
+    setPositions(prev => prev.map(p => {
+      if (p.id === id) {
+        const item = { ...p, ...data };
+        savePositionToSupabase(item);
+        return item;
+      }
+      return p;
+    }));
   };
 
   const deletePosition = (id: string) => {
     setPositions(prev => prev.filter(p => p.id !== id));
+    deletePositionFromSupabase(id);
   };
 
   // Program Actions
   const addProgram = (prog: Omit<SchoolProgramDetail, 'id'>) => {
     const id = `prog-${Date.now().toString().slice(-4)}`;
-    setDetailedPrograms(prev => [...prev, { ...prog, id }]);
+    const newProg: SchoolProgramDetail = { ...prog, id };
+    setDetailedPrograms(prev => [...prev, newProg]);
+    saveProgramToSupabase(newProg);
   };
 
   const updateProgram = (id: string, data: Partial<SchoolProgramDetail>) => {
-    setDetailedPrograms(prev => prev.map(p => p.id === id ? { ...p, ...data } : p));
+    setDetailedPrograms(prev => prev.map(p => {
+      if (p.id === id) {
+        const item = { ...p, ...data };
+        saveProgramToSupabase(item);
+        return item;
+      }
+      return p;
+    }));
   };
 
   const deleteProgram = (id: string) => {
     setDetailedPrograms(prev => prev.filter(p => p.id !== id));
+    deleteProgramFromSupabase(id);
   };
 
   // Admission Actions
@@ -470,20 +559,24 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const createObservationSlot = (slotData: Omit<ObservationSlot, 'id' | 'bookedCount'>) => {
     const newSlot: ObservationSlot = {
       ...slotData,
-      id: `obs-${Date.now().toString().slice(-4)}`,
+      id: generateUUID(),
       bookedCount: 0
     };
     setObservationSlots(prev => [...prev, newSlot]);
+    saveObservationSlotToSupabase(newSlot);
   };
 
   const bookObservationSlot = (admissionId: string, slotId: string) => {
     const slot = observationSlots.find(s => s.id === slotId);
     if (!slot || slot.bookedCount >= slot.capacity) return;
 
-    setObservationSlots(prev => prev.map(s => s.id === slotId ? { ...s, bookedCount: s.bookedCount + 1 } : s));
+    const updatedSlot = { ...slot, bookedCount: slot.bookedCount + 1 };
+    setObservationSlots(prev => prev.map(s => s.id === slotId ? updatedSlot : s));
+    saveObservationSlotToSupabase(updatedSlot);
+
     setAdmissions(prev => prev.map(a => {
       if (a.id === admissionId) {
-        return {
+        const item: AdmissionApplication = {
           ...a,
           observationStatus: 'terjadwal',
           observationSlot: {
@@ -493,6 +586,8 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             room: slot.room
           }
         };
+        saveAdmissionToSupabase(item);
+        return item;
       }
       return a;
     }));
@@ -502,8 +597,9 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const adm = admissions.find(a => a.id === admissionId);
     if (!adm) return;
 
+    const newStudentId = generateUUID();
     const newStudent: Student = {
-      id: `std-${Date.now().toString().slice(-4)}`,
+      id: newStudentId,
       nis: `LS-2026-${String(students.length + 1).padStart(3, '0')}`,
       fullName: adm.childName,
       nickname: adm.childNickname || adm.childName.split(' ')[0],
@@ -530,32 +626,58 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     };
 
     setStudents(prev => [newStudent, ...prev]);
-    setAdmissions(prev => prev.map(a => a.id === admissionId ? { ...a, admissionDecision: 'diterima' } : a));
+    saveStudentToSupabase(newStudent);
+
+    setAdmissions(prev => prev.map(a => {
+      if (a.id === admissionId) {
+        const updatedAdm: AdmissionApplication = { ...a, admissionDecision: 'diterima' };
+        saveAdmissionToSupabase(updatedAdm);
+        return updatedAdm;
+      }
+      return a;
+    }));
+  };
+
+  const deleteAdmission = (id: string) => {
+    setAdmissions(prev => prev.filter(a => a.id !== id));
+    deleteAdmissionFromSupabase(id);
   };
 
   // Task Actions
   const addTask = (task: Omit<TeacherTask, 'id'>) => {
-    const id = `tsk-${Date.now().toString().slice(-4)}`;
-    setTasks(prev => [{ ...task, id }, ...prev]);
+    const id = generateUUID();
+    const newTask: TeacherTask = { ...task, id };
+    setTasks(prev => [newTask, ...prev]);
+    saveTaskToSupabase(newTask);
   };
 
   const updateTask = (id: string, data: Partial<TeacherTask>) => {
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, ...data } : t));
+    setTasks(prev => prev.map(t => {
+      if (t.id === id) {
+        const item = { ...t, ...data };
+        saveTaskToSupabase(item);
+        return item;
+      }
+      return t;
+    }));
   };
 
   const deleteTask = (id: string) => {
     setTasks(prev => prev.filter(t => t.id !== id));
+    deleteTaskFromSupabase(id);
   };
 
   const updateTaskStatus = (id: string, status: TeacherTask['status'], reviewerNotes?: string) => {
     setTasks(prev => prev.map(t => {
       if (t.id === id) {
-        return {
+        const item: TeacherTask = {
           ...t,
           status,
           reviewerNotes: reviewerNotes !== undefined ? reviewerNotes : t.reviewerNotes,
           submissionDate: status === 'dikirim' ? new Date().toISOString().split('T')[0] : t.submissionDate
         };
+        saveTaskToSupabase(item);
+        return item;
       }
       return t;
     }));
@@ -617,13 +739,15 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         decisionRationale: '',
         planningMatrix: []
       };
+      const updated: StudentDevelopmentRecord = {
+        ...existing,
+        ...record,
+        lastUpdated: new Date().toISOString().split('T')[0]
+      };
+      saveSDRToSupabase(studentId, updated);
       return {
         ...prev,
-        [studentId]: {
-          ...existing,
-          ...record,
-          lastUpdated: new Date().toISOString().split('T')[0]
-        }
+        [studentId]: updated
       };
     });
   };
@@ -681,8 +805,9 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
   };
 
+  // Consultation Actions
   const addConsultationRequest = (data: Omit<ConsultationRequest, 'id' | 'createdAt' | 'status'>) => {
-    const id = `cst-${Date.now().toString().slice(-4)}`;
+    const id = generateUUID();
     const newReq: ConsultationRequest = {
       ...data,
       id,
@@ -690,6 +815,7 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       createdAt: new Date().toISOString().split('T')[0]
     };
     setConsultations(prev => [newReq, ...prev]);
+    saveConsultationToSupabase(newReq);
 
     // Send high priority notification to principal & staff
     setNotifications(prev => [
@@ -715,18 +841,21 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   ) => {
     setConsultations(prev => prev.map(c => {
       if (c.id === id) {
-        return {
+        const item: ConsultationRequest = {
           ...c,
           status,
           feedbackNotes: feedbackNotes !== undefined ? feedbackNotes : c.feedbackNotes,
           confirmedDate: confirmedDate || c.confirmedDate,
           confirmedTime: confirmedTime || c.confirmedTime
         };
+        saveConsultationToSupabase(item);
+        return item;
       }
       return c;
     }));
   };
 
+  // Gallery Management
   const addGalleryItem = (item: Omit<GalleryItem, 'id' | 'date'>) => {
     const newItem: GalleryItem = {
       ...item,
@@ -771,6 +900,7 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       schedules,
       attendance,
       consultations,
+      isSyncing,
       addStudent,
       updateStudent,
       deleteStudent,
@@ -791,6 +921,7 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       bookObservationSlot,
       createObservationSlot,
       admitStudentFromAdmission,
+      deleteAdmission,
       addTask,
       updateTask,
       deleteTask,
@@ -807,7 +938,8 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       addGalleryItem,
       deleteGalleryItem,
       toggleTakeDownGalleryItem,
-      markNotificationAsRead
+      markNotificationAsRead,
+      refreshAllData: loadSupabaseData
     }}>
       {children}
     </SchoolDataContext.Provider>

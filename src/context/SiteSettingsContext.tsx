@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { fetchSiteSettingsFromSupabase, saveSiteSettingsToSupabase } from '../lib/supabaseSchoolService';
 
 export interface SiteSettings {
   // 1. Branding & Identitas Sekolah
@@ -134,6 +135,21 @@ export const SiteSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ 
     return DEFAULT_SITE_SETTINGS;
   });
 
+  // Load from Supabase on mount
+  useEffect(() => {
+    async function loadRemoteSettings() {
+      try {
+        const remoteSettings = await fetchSiteSettingsFromSupabase();
+        if (remoteSettings && typeof remoteSettings === 'object') {
+          setSettings(prev => ({ ...prev, ...remoteSettings }));
+        }
+      } catch (err) {
+        console.warn('Failed to load remote site settings:', err);
+      }
+    }
+    loadRemoteSettings();
+  }, []);
+
   useEffect(() => {
     try {
       localStorage.setItem('ls_site_settings', JSON.stringify(settings));
@@ -143,11 +159,16 @@ export const SiteSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }, [settings]);
 
   const updateSettings = (newSettings: Partial<SiteSettings>) => {
-    setSettings(prev => ({ ...prev, ...newSettings }));
+    setSettings(prev => {
+      const updated = { ...prev, ...newSettings };
+      saveSiteSettingsToSupabase(updated);
+      return updated;
+    });
   };
 
   const resetSettings = () => {
     setSettings(DEFAULT_SITE_SETTINGS);
+    saveSiteSettingsToSupabase(DEFAULT_SITE_SETTINGS);
   };
 
   const getWhatsAppUrl = (customMessage?: string): string => {
