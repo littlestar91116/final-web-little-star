@@ -14,6 +14,10 @@ CREATE TABLE IF NOT EXISTS public.roles (
   description TEXT
 );
 
+-- Pastikan kolom ada jika tabel roles sudah ada sebelumnya di database
+ALTER TABLE public.roles ADD COLUMN IF NOT EXISTS name TEXT;
+ALTER TABLE public.roles ADD COLUMN IF NOT EXISTS description TEXT;
+
 INSERT INTO public.roles (id, name, description) VALUES
   ('super_admin', 'Super Admin', 'Akses penuh seluruh konfigurasi, database, & kelola akun'),
   ('admin_sekolah', 'Admin Sekolah', 'Pendaftaran PSB, data siswa, penugasan & operasional'),

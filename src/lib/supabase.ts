@@ -82,6 +82,10 @@ CREATE TABLE IF NOT EXISTS roles (
   description TEXT
 );
 
+-- Pastikan kolom ada jika tabel roles sudah dibuat sebelumnya
+ALTER TABLE roles ADD COLUMN IF NOT EXISTS name TEXT;
+ALTER TABLE roles ADD COLUMN IF NOT EXISTS description TEXT;
+
 INSERT INTO roles (id, name, description) VALUES
   ('super_admin', 'Super Admin', 'Akses penuh seluruh konfigurasi, database, & kelola akun'),
   ('admin_sekolah', 'Admin Sekolah', 'Pendaftaran PSB, data siswa, penugasan & operasional'),
@@ -113,6 +117,18 @@ CREATE TABLE IF NOT EXISTS profiles (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Pastikan kolom ada jika tabel profiles sudah dibuat sebelumnya
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS username TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS email TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS role_id TEXT REFERENCES roles(id) DEFAULT 'wali_murid';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS phone TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'active';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS freeze_reason TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS staff_id TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS child_student_id TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS custom_permissions JSONB DEFAULT '[]'::jsonb;
 
 -- Index profiles
 CREATE INDEX IF NOT EXISTS idx_profiles_username ON profiles (LOWER(username));
