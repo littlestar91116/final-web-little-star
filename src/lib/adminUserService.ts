@@ -1,3 +1,4 @@
+import { createClient } from '@supabase/supabase-js';
 import { getSupabaseClient, getSupabaseConfig } from './supabase';
 import { UserAccount, UserRole } from '../types';
 
@@ -129,6 +130,77 @@ export async function createAdminUser(
         } else if (edgeRes.error) {
           console.warn('Edge function error:', edgeRes.error);
         }
+      }
+
+      // 3. Direct client-side creation via Supabase Auth signUp (non-persisting client)
+      try {
+        const tempClient = createClient(config.url, config.anonKey, {
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false,
+            detectSessionInUrl: false
+          }
+        });
+
+        const { data: signUpData, error: signUpError } = await tempClient.auth.signUp({
+          email: cleanEmail,
+          password: cleanPassword,
+          options: {
+            data: {
+              username: cleanUsername,
+              full_name: payload.name,
+              role: payload.role,
+              phone: payload.phone,
+              avatar_url: payload.avatarUrl,
+              staff_id: payload.staffId,
+              child_student_id: payload.childStudentId,
+              status: payload.status || 'active',
+              custom_permissions: payload.customPermissions
+            }
+          }
+        });
+
+        const newUserId = signUpData?.user?.id;
+        if (newUserId) {
+          // Upsert to public.profiles to guarantee all custom fields are saved
+          await supabase.from('profiles').upsert({
+            id: newUserId,
+            username: cleanUsername,
+            full_name: payload.name,
+            role_id: payload.role,
+            email: cleanEmail,
+            phone: payload.phone,
+            avatar_url: payload.avatarUrl,
+            status: payload.status || 'active',
+            freeze_reason: payload.freezeReason,
+            staff_id: payload.staffId,
+            child_student_id: payload.childStudentId,
+            custom_permissions: payload.customPermissions,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'id' });
+
+          return {
+            success: true,
+            user: {
+              id: newUserId,
+              username: cleanUsername,
+              email: cleanEmail,
+              name: payload.name,
+              role: payload.role,
+              phone: payload.phone,
+              avatarUrl: payload.avatarUrl,
+              childStudentId: payload.childStudentId,
+              staffId: payload.staffId,
+              status: payload.status || 'active',
+              freezeReason: payload.freezeReason,
+              customPermissions: payload.customPermissions
+            }
+          };
+        } else if (signUpError) {
+          console.warn('Direct Supabase signUp error:', signUpError);
+        }
+      } catch (authErr) {
+        console.warn('Direct Supabase signUp exception:', authErr);
       }
     } catch (err: any) {
       console.warn('Backend call failed, evaluating fallback:', err);

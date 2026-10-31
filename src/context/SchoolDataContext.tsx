@@ -36,6 +36,27 @@ import {
   INITIAL_ATTENDANCE,
   INITIAL_CONSULTATIONS
 } from '../lib/mockData';
+import { 
+  fetchStudentsFromSupabase, 
+  saveStudentToSupabase, 
+  deleteStudentFromSupabase,
+  fetchStaffFromSupabase,
+  saveStaffToSupabase,
+  deleteStaffFromSupabase,
+  fetchClassesFromSupabase,
+  saveClassToSupabase,
+  deleteClassFromSupabase,
+  fetchAdmissionsFromSupabase,
+  saveAdmissionToSupabase,
+  fetchGalleryFromSupabase,
+  saveGalleryItemToSupabase,
+  deleteGalleryItemFromSupabase,
+  fetchInvoicesFromSupabase,
+  saveInvoiceToSupabase,
+  fetchCasesFromSupabase,
+  saveCaseToSupabase,
+  generateUUID
+} from '../lib/supabaseSchoolService';
 
 interface SchoolDataContextType {
   students: Student[];
@@ -203,6 +224,43 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     return saved ? JSON.parse(saved) : INITIAL_CONSULTATIONS;
   });
 
+  // Synchronize initial data from Supabase if connected
+  useEffect(() => {
+    async function loadSupabaseData() {
+      try {
+        const [
+          dbStudents, 
+          dbStaff, 
+          dbClasses, 
+          dbAdmissions, 
+          dbGallery, 
+          dbInvoices, 
+          dbCases
+        ] = await Promise.all([
+          fetchStudentsFromSupabase(),
+          fetchStaffFromSupabase(),
+          fetchClassesFromSupabase(),
+          fetchAdmissionsFromSupabase(),
+          fetchGalleryFromSupabase(),
+          fetchInvoicesFromSupabase(),
+          fetchCasesFromSupabase()
+        ]);
+
+        if (dbStudents && dbStudents.length > 0) setStudents(dbStudents);
+        if (dbStaff && dbStaff.length > 0) setStaff(dbStaff);
+        if (dbClasses && dbClasses.length > 0) setClasses(dbClasses);
+        if (dbAdmissions && dbAdmissions.length > 0) setAdmissions(dbAdmissions);
+        if (dbGallery && dbGallery.length > 0) setGallery(dbGallery);
+        if (dbInvoices && dbInvoices.length > 0) setInvoices(dbInvoices);
+        if (dbCases && dbCases.length > 0) setCases(dbCases);
+      } catch (err) {
+        console.warn('Initial load from Supabase failed, using local cache:', err);
+      }
+    }
+
+    loadSupabaseData();
+  }, []);
+
   // Sync to local storage
   useEffect(() => {
     localStorage.setItem('ls_schedules', JSON.stringify(schedules));
@@ -257,46 +315,85 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   // Student Actions
   const addStudent = (newStd: Omit<Student, 'id'> & { id?: string }): string => {
-    const id = newStd.id || `std-${Date.now().toString().slice(-4)}`;
-    setStudents(prev => [{ ...newStd, id }, ...prev]);
+    const id = newStd.id || generateUUID();
+    const student: Student = { ...newStd, id };
+    setStudents(prev => [student, ...prev]);
+    saveStudentToSupabase(student);
     return id;
   };
 
   const updateStudent = (id: string, data: Partial<Student>) => {
-    setStudents(prev => prev.map(s => s.id === id ? { ...s, ...data } : s));
+    setStudents(prev => {
+      const updated = prev.map(s => {
+        if (s.id === id) {
+          const item = { ...s, ...data };
+          saveStudentToSupabase(item);
+          return item;
+        }
+        return s;
+      });
+      return updated;
+    });
   };
 
   const deleteStudent = (id: string) => {
     setStudents(prev => prev.filter(s => s.id !== id));
+    deleteStudentFromSupabase(id);
   };
 
   // Staff Actions
   const addStaff = (member: Omit<StaffMember, 'id'> & { id?: string }): string => {
-    const id = member.id || `stf-${Date.now().toString().slice(-4)}`;
-    setStaff(prev => [{ ...member, id }, ...prev]);
+    const id = member.id || generateUUID();
+    const newMember: StaffMember = { ...member, id };
+    setStaff(prev => [newMember, ...prev]);
+    saveStaffToSupabase(newMember);
     return id;
   };
 
   const updateStaff = (id: string, data: Partial<StaffMember>) => {
-    setStaff(prev => prev.map(s => s.id === id ? { ...s, ...data } : s));
+    setStaff(prev => {
+      const updated = prev.map(s => {
+        if (s.id === id) {
+          const item = { ...s, ...data };
+          saveStaffToSupabase(item);
+          return item;
+        }
+        return s;
+      });
+      return updated;
+    });
   };
 
   const deleteStaff = (id: string) => {
     setStaff(prev => prev.filter(s => s.id !== id));
+    deleteStaffFromSupabase(id);
   };
 
   // Class Actions
   const addClass = (cls: Omit<SchoolClass, 'id'>) => {
-    const id = `cls-${Date.now().toString().slice(-4)}`;
-    setClasses(prev => [...prev, { ...cls, id }]);
+    const id = generateUUID();
+    const newClass: SchoolClass = { ...cls, id };
+    setClasses(prev => [...prev, newClass]);
+    saveClassToSupabase(newClass);
   };
 
   const updateClass = (id: string, data: Partial<SchoolClass>) => {
-    setClasses(prev => prev.map(c => c.id === id ? { ...c, ...data } : c));
+    setClasses(prev => {
+      const updated = prev.map(c => {
+        if (c.id === id) {
+          const item = { ...c, ...data };
+          saveClassToSupabase(item);
+          return item;
+        }
+        return c;
+      });
+      return updated;
+    });
   };
 
   const deleteClass = (id: string) => {
     setClasses(prev => prev.filter(c => c.id !== id));
+    deleteClassFromSupabase(id);
   };
 
   // Position Actions
@@ -329,7 +426,7 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   // Admission Actions
   const addAdmission = (data: Omit<AdmissionApplication, 'id' | 'applicationNumber' | 'createdAt'>): string => {
-    const id = `adm-${Date.now().toString().slice(-4)}`;
+    const id = generateUUID();
     const appNum = `PSB-2026-${Math.floor(100 + Math.random() * 900)}`;
     const newAdm: AdmissionApplication = {
       ...data,
@@ -338,6 +435,7 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       createdAt: new Date().toISOString().split('T')[0]
     };
     setAdmissions(prev => [newAdm, ...prev]);
+    saveAdmissionToSupabase(newAdm);
 
     // Add notification
     setNotifications(prev => [
@@ -358,10 +456,12 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const verifyAdmissionPayment = (id: string, isApproved: boolean) => {
     setAdmissions(prev => prev.map(a => {
       if (a.id === id) {
-        return {
+        const item: AdmissionApplication = {
           ...a,
           paymentStatus: isApproved ? 'terverifikasi' : 'ditolak'
         };
+        saveAdmissionToSupabase(item);
+        return item;
       }
       return a;
     }));
@@ -463,7 +563,7 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   // Case Actions
   const addCase = (data: Omit<StudentCase, 'id' | 'caseNumber' | 'dateTime'>) => {
-    const id = `cas-${Date.now().toString().slice(-4)}`;
+    const id = generateUUID();
     const caseNumber = `CS-2026-${String(cases.length + 1).padStart(3, '0')}`;
     const newCase: StudentCase = {
       ...data,
@@ -472,6 +572,7 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       dateTime: new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }) + ' WIB'
     };
     setCases(prev => [newCase, ...prev]);
+    saveCaseToSupabase(newCase);
 
     setNotifications(prev => [
       {
@@ -490,12 +591,14 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const updateCaseStatus = (id: string, status: StudentCase['status'], followUpNotes?: string) => {
     setCases(prev => prev.map(c => {
       if (c.id === id) {
-        return {
+        const item: StudentCase = {
           ...c,
           status,
           resolutionNotes: followUpNotes || c.resolutionNotes,
           resolvedAt: status === 'selesai' ? new Date().toISOString().split('T')[0] : c.resolvedAt
         };
+        saveCaseToSupabase(item);
+        return item;
       }
       return c;
     }));
@@ -537,12 +640,14 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const verifyInvoicePayment = (invoiceId: string, isApproved: boolean) => {
     setInvoices(prev => prev.map(inv => {
       if (inv.id === invoiceId) {
-        return {
+        const item: SPPInvoice = {
           ...inv,
           status: isApproved ? 'lunas' : 'ditolak',
           paidAmount: isApproved ? inv.amount : inv.paidAmount,
           verifiedBy: isApproved ? 'Bapak Ilham Pratama, S.E.' : undefined
         };
+        saveInvoiceToSupabase(item);
+        return item;
       }
       return inv;
     }));
@@ -551,21 +656,25 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const uploadPaymentProof = (invoiceId: string, proofUrl: string) => {
     setInvoices(prev => prev.map(inv => {
       if (inv.id === invoiceId) {
-        return {
+        const item: SPPInvoice = {
           ...inv,
           paymentProofUrl: proofUrl,
           paymentDate: new Date().toISOString().split('T')[0],
           status: 'menunggu_verifikasi'
         };
+        saveInvoiceToSupabase(item);
+        return item;
       }
       return inv;
     }));
   };
 
   const createInvoice = (data: Omit<SPPInvoice, 'id' | 'invoiceNumber'>) => {
-    const id = `inv-${Date.now().toString().slice(-4)}`;
+    const id = generateUUID();
     const invNum = `INV/2026/10/${String(invoices.length + 1).padStart(3, '0')}`;
-    setInvoices(prev => [{ ...data, id, invoiceNumber: invNum }, ...prev]);
+    const newInvoice: SPPInvoice = { ...data, id, invoiceNumber: invNum };
+    setInvoices(prev => [newInvoice, ...prev]);
+    saveInvoiceToSupabase(newInvoice);
   };
 
   const markNotificationAsRead = (id: string) => {
@@ -621,20 +730,24 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const addGalleryItem = (item: Omit<GalleryItem, 'id' | 'date'>) => {
     const newItem: GalleryItem = {
       ...item,
-      id: `gal-${Date.now()}`,
+      id: generateUUID(),
       date: new Date().toISOString().split('T')[0]
     };
     setGallery(prev => [newItem, ...prev]);
+    saveGalleryItemToSupabase(newItem);
   };
 
   const deleteGalleryItem = (id: string) => {
     setGallery(prev => prev.filter(g => g.id !== id));
+    deleteGalleryItemFromSupabase(id);
   };
 
   const toggleTakeDownGalleryItem = (id: string) => {
     setGallery(prev => prev.map(g => {
       if (g.id === id) {
-        return { ...g, isPublic: !g.isPublic };
+        const item = { ...g, isPublic: !g.isPublic };
+        saveGalleryItemToSupabase(item);
+        return item;
       }
       return g;
     }));
