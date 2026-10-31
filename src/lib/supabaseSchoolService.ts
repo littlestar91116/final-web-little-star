@@ -69,17 +69,17 @@ export async function fetchStudentsFromSupabase(): Promise<Student[] | null> {
 
     return data.map((row: any) => ({
       id: row.id,
-      nis: row.nis || '',
+      nis: row.student_code || row.nis || '',
       nisn: row.nisn || undefined,
       fullName: row.full_name || '',
-      nickname: row.nickname || row.full_name?.split(' ')[0] || '',
+      nickname: row.preferred_name || row.nickname || row.full_name?.split(' ')[0] || '',
       gender: (row.gender as 'L' | 'P') || 'L',
       birthPlace: row.birth_place || '',
       birthDate: row.birth_date || '2020-01-01',
       address: row.address || '',
-      photoUrl: row.photo_url || 'https://images.unsplash.com/photo-1543332164-6e82f355badc?w=150&auto=format&fit=crop&q=80',
-      joinDate: row.join_date || (row.created_at ? row.created_at.split('T')[0] : '2026-01-01'),
-      academicYear: row.academic_year || '2026/2027',
+      photoUrl: row.photo_path || row.photo_url || 'https://images.unsplash.com/photo-1543332164-6e82f355badc?w=150&auto=format&fit=crop&q=80',
+      joinDate: row.joined_on || (row.created_at ? row.created_at.split('T')[0] : '2026-01-01'),
+      academicYear: '2026/2027',
       status: row.status || 'aktif',
       className: row.class_name || 'Bintang Kejora (Kelas A)',
       enrolledPrograms: Array.isArray(row.enrolled_programs) ? row.enrolled_programs : ['sekolah_pagi'],
@@ -109,21 +109,21 @@ export async function saveStudentToSupabase(student: Student): Promise<string | 
     const dbId = toDeterministicUUID(student.id);
     const payload = {
       id: dbId,
-      nis: student.nis,
+      student_code: student.nis || `LS-2026-${String(Date.now()).slice(-3)}`,
       nisn: student.nisn || null,
       full_name: student.fullName,
-      nickname: student.nickname,
-      gender: student.gender,
-      birth_place: student.birthPlace,
-      birth_date: student.birthDate,
-      address: student.address,
-      photo_url: student.photoUrl,
-      status: student.status,
+      preferred_name: student.nickname || student.fullName.split(' ')[0],
+      gender: student.gender || 'L',
+      birth_place: student.birthPlace || '',
+      birth_date: student.birthDate || '2020-01-01',
+      address: student.address || '',
+      photo_path: student.photoUrl,
+      status: student.status || 'aktif',
+      joined_on: student.joinDate || new Date().toISOString().split('T')[0],
       class_name: student.className,
-      enrolled_programs: student.enrolledPrograms,
+      enrolled_programs: student.enrolledPrograms || ['sekolah_pagi'],
       special_needs_notes: student.specialNeedsNotes || null,
-      parent_info: student.parent,
-      created_at: new Date().toISOString()
+      parent_info: student.parent
     };
 
     const { error } = await supabase.from('students').upsert(payload, { onConflict: 'id' });
@@ -161,23 +161,23 @@ export async function fetchStaffFromSupabase(): Promise<StaffMember[] | null> {
   if (!supabase || !config.isConnected) return null;
 
   try {
-    const { data, error } = await supabase.from('staff').select('*').order('join_date', { ascending: false });
+    const { data, error } = await supabase.from('staff').select('*').order('created_at', { ascending: false });
     if (error || !data || data.length === 0) return null;
 
     return data.map((row: any) => ({
       id: row.id,
-      nip: row.nip || '',
+      nip: row.employee_code || row.nip || '',
       name: row.full_name || '',
       gender: (row.gender as 'L' | 'P') || 'P',
-      photoUrl: row.photo_url || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
+      photoUrl: row.photo_url || row.photo_path || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
       phone: row.phone || '',
       email: row.email || '',
       role: row.role_id || 'guru_sekolah_pagi',
       jobTitle: row.job_title || 'Guru',
       qualification: row.qualification || 'S.Pd.',
       specialization: row.specialization || 'Pendidikan Khusus',
-      joinDate: row.join_date || '2026-01-01',
-      status: row.status || 'tetap',
+      joinDate: row.joined_on || (row.created_at ? row.created_at.split('T')[0] : '2026-01-01'),
+      status: (row.employment_status || row.status || 'tetap') as any,
       assignedPrograms: Array.isArray(row.assigned_programs) ? row.assigned_programs : ['sekolah_pagi'],
       assignedStudentsCount: row.assigned_students_count || 0
     }));
@@ -196,19 +196,16 @@ export async function saveStaffToSupabase(member: StaffMember): Promise<string |
     const dbId = toDeterministicUUID(member.id);
     const payload = {
       id: dbId,
-      nip: member.nip,
+      employee_code: member.nip || `STF-${String(Date.now()).slice(-3)}`,
       full_name: member.name,
-      gender: member.gender,
-      role_id: member.role,
-      phone: member.phone,
-      email: member.email,
-      job_title: member.jobTitle,
-      status: member.status,
+      job_title: member.jobTitle || 'Guru',
+      employment_status: member.status || 'tetap',
+      joined_on: member.joinDate || new Date().toISOString().split('T')[0],
+      qualification: member.qualification || 'S.Pd.',
+      specialization: member.specialization || 'Pendidikan Khusus',
       photo_url: member.photoUrl,
-      qualification: member.qualification,
-      specialization: member.specialization,
-      assigned_programs: member.assignedPrograms,
-      join_date: member.joinDate || new Date().toISOString().split('T')[0]
+      photo_path: member.photoUrl,
+      assigned_programs: member.assignedPrograms || ['sekolah_pagi']
     };
 
     const { error } = await supabase.from('staff').upsert(payload, { onConflict: 'id' });
@@ -274,11 +271,11 @@ export async function saveClassToSupabase(cls: SchoolClass): Promise<string | nu
     const payload = {
       id: dbId,
       name: cls.name,
-      room_number: cls.room,
       capacity: cls.capacity,
       type: cls.type,
       program: cls.program,
-      description: cls.description || ''
+      description: cls.description || '',
+      is_active: true
     };
 
     const { error } = await supabase.from('classes').upsert(payload, { onConflict: 'id' });
@@ -321,15 +318,15 @@ export async function fetchAdmissionsFromSupabase(): Promise<AdmissionApplicatio
 
     return data.map((row: any) => ({
       id: row.id,
-      applicationNumber: row.application_number || `PSB-${Date.now()}`,
+      applicationNumber: row.application_no || row.application_number || `PSB-${Date.now()}`,
       childName: row.child_name || '',
       childNickname: row.child_nickname || row.child_name?.split(' ')[0] || '',
       gender: (row.gender as 'L' | 'P') || 'L',
       birthDate: row.birth_date || '2020-01-01',
       birthPlace: row.birth_place || '',
-      parentName: row.parent_name || '',
-      parentPhone: row.parent_phone || '',
-      parentEmail: row.parent_email || '',
+      parentName: row.guardian_name || row.parent_name || '',
+      parentPhone: row.guardian_phone || row.parent_phone || '',
+      parentEmail: row.guardian_email || row.parent_email || '',
       address: row.address || '',
       selectedPrograms: Array.isArray(row.selected_programs) ? row.selected_programs : ['sekolah_pagi'],
       documents: row.documents || { birthCertificate: true, familyCard: true },
@@ -358,27 +355,28 @@ export async function saveAdmissionToSupabase(adm: AdmissionApplication): Promis
     const dbId = toDeterministicUUID(adm.id);
     const payload = {
       id: dbId,
-      application_number: adm.applicationNumber,
+      application_no: adm.applicationNumber,
       child_name: adm.childName,
       child_nickname: adm.childNickname,
-      gender: adm.gender,
+      gender: adm.gender || 'L',
       birth_date: adm.birthDate,
       birth_place: adm.birthPlace,
-      parent_name: adm.parentName,
-      parent_phone: adm.parentPhone,
-      parent_email: adm.parentEmail,
+      guardian_name: adm.parentName || 'Orang Tua',
+      guardian_phone: adm.parentPhone || '08123456789',
+      guardian_email: adm.parentEmail || null,
+      parent_email: adm.parentEmail || null,
       address: adm.address,
       selected_programs: adm.selectedPrograms,
       documents: adm.documents,
-      admin_fee_amount: adm.adminFeeAmount,
+      admin_fee_amount: adm.adminFeeAmount || 500000,
+      status: adm.paymentStatus === 'terverifikasi' ? 'verified' : 'draft',
       payment_status: adm.paymentStatus,
       payment_proof_url: adm.paymentProofUrl || null,
       payment_date: adm.paymentDate || null,
       observation_slot: adm.observationSlot || null,
       observation_status: adm.observationStatus,
       admission_decision: adm.admissionDecision,
-      notes: adm.notes || null,
-      created_at: adm.createdAt ? new Date(adm.createdAt).toISOString() : new Date().toISOString()
+      notes: adm.notes || null
     };
 
     const { error } = await supabase.from('admissions').upsert(payload, { onConflict: 'id' });
@@ -415,19 +413,19 @@ export async function fetchGalleryFromSupabase(): Promise<GalleryItem[] | null> 
   if (!supabase || !config.isConnected) return null;
 
   try {
-    const { data, error } = await supabase.from('gallery').select('*').order('uploaded_at', { ascending: false });
+    const { data, error } = await supabase.from('gallery').select('*').order('created_at', { ascending: false });
     if (error || !data || data.length === 0) return null;
 
     return data.map((row: any) => ({
       id: row.id,
       title: row.title || 'Foto Kegiatan',
-      mediaType: row.media_type || (row.media_url?.includes('.mp4') ? 'video' : 'image'),
-      mediaUrl: row.media_url,
-      program: row.program_id || 'sekolah_pagi',
+      mediaType: row.media_type || (row.storage_path?.includes('.mp4') ? 'video' : 'image'),
+      mediaUrl: row.storage_path || row.media_url || '',
+      program: 'sekolah_pagi',
       category: row.category || 'kegiatan',
-      date: row.uploaded_at ? row.uploaded_at.split('T')[0] : '2026-01-01',
+      date: row.created_at ? row.created_at.split('T')[0] : '2026-01-01',
       description: row.description || '',
-      isPublic: row.is_public !== false,
+      isPublic: row.visibility !== 'private',
       hasParentConsent: row.has_parent_consent !== false,
       studentIds: Array.isArray(row.student_ids) ? row.student_ids : []
     }));
@@ -447,15 +445,14 @@ export async function saveGalleryItemToSupabase(item: GalleryItem): Promise<stri
     const payload = {
       id: dbId,
       title: item.title,
-      program_id: item.program,
-      category: item.category,
-      media_url: item.mediaUrl,
-      media_type: item.mediaType,
+      media_type: item.mediaType || 'image',
+      storage_path: item.mediaUrl || 'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=800',
+      category: item.category || 'kegiatan',
+      program_id: null,
       description: item.description || '',
-      is_public: item.isPublic !== false,
+      visibility: item.isPublic !== false ? 'public' : 'private',
       has_parent_consent: item.hasParentConsent !== false,
-      student_ids: item.studentIds || [],
-      uploaded_at: item.date ? new Date(item.date).toISOString() : new Date().toISOString()
+      student_ids: item.studentIds || []
     };
 
     const { error } = await supabase.from('gallery').upsert(payload, { onConflict: 'id' });
@@ -498,14 +495,14 @@ export async function fetchInvoicesFromSupabase(): Promise<SPPInvoice[] | null> 
 
     return data.map((row: any) => ({
       id: row.id,
-      invoiceNumber: row.invoice_number || `INV-${Date.now()}`,
+      invoiceNumber: row.invoice_no || row.invoice_number || `INV-${Date.now()}`,
       studentId: row.student_id || '',
       studentName: row.student_name || 'Siswa',
-      program: row.program_id || 'sekolah_pagi',
-      month: row.month || 'Oktober',
-      year: row.year || 2026,
-      amount: Number(row.amount) || 0,
-      dueDate: row.due_date || '2026-10-10',
+      program: 'sekolah_pagi',
+      month: 'Oktober',
+      year: 2026,
+      amount: Number(row.amount_snapshot || row.amount || 0),
+      dueDate: row.due_date || (row.due_at ? row.due_at.split('T')[0] : '2026-10-10'),
       status: row.status || 'belum_bayar',
       paidAmount: Number(row.paid_amount) || 0,
       paymentProofUrl: row.payment_proof_url || undefined,
@@ -527,20 +524,19 @@ export async function saveInvoiceToSupabase(inv: SPPInvoice): Promise<string | n
     const dbId = toDeterministicUUID(inv.id);
     const payload = {
       id: dbId,
-      invoice_number: inv.invoiceNumber,
-      student_id: isUUID(inv.studentId) ? inv.studentId : null,
+      invoice_no: inv.invoiceNumber,
+      invoice_type: 'spp',
+      amount_snapshot: inv.amount,
       student_name: inv.studentName,
-      program_id: inv.program,
-      month: inv.month,
-      year: inv.year,
-      amount: inv.amount,
-      due_date: inv.dueDate,
+      student_id: isUUID(inv.studentId) ? inv.studentId : toDeterministicUUID(inv.studentId),
       status: inv.status,
       paid_amount: inv.paidAmount || 0,
+      due_date: inv.dueDate,
+      due_at: inv.dueDate ? new Date(inv.dueDate).toISOString() : new Date().toISOString(),
+      issued_at: new Date().toISOString(),
       payment_proof_url: inv.paymentProofUrl || null,
       payment_date: inv.paymentDate || null,
-      verified_by: inv.verifiedBy || null,
-      created_at: new Date().toISOString()
+      verified_by: inv.verifiedBy || null
     };
 
     const { error } = await supabase.from('invoices').upsert(payload, { onConflict: 'id' });
@@ -582,19 +578,19 @@ export async function fetchCasesFromSupabase(): Promise<StudentCase[] | null> {
 
     return data.map((row: any) => ({
       id: row.id,
-      caseNumber: row.case_number || `CS-${Date.now()}`,
+      caseNumber: row.case_no || `CS-${Date.now()}`,
       studentId: row.student_id || '',
       studentName: row.student_name || 'Siswa',
-      program: row.program_id || 'sekolah_pagi',
+      program: 'sekolah_pagi',
       reportedBy: row.reported_by || 'Guru',
       reporterRole: row.reporter_role || 'Guru Kelas',
       dateTime: row.date_time || 'Baru saja',
       caseType: row.case_type || 'perilaku',
       priority: row.priority || 'sedang',
-      description: row.description || '',
+      description: row.chronology || row.description || '',
       initialActionTaken: row.initial_action_taken || '',
       status: row.status || 'dilaporkan',
-      followUpPlan: row.followUpPlan || row.follow_up_plan || '',
+      followUpPlan: row.follow_up_plan || '',
       assignedStaff: row.assigned_staff || '',
       resolutionNotes: row.resolution_notes || undefined,
       resolvedAt: row.resolved_at || undefined
@@ -614,23 +610,21 @@ export async function saveCaseToSupabase(c: StudentCase): Promise<string | null>
     const dbId = toDeterministicUUID(c.id);
     const payload = {
       id: dbId,
-      case_number: c.caseNumber,
-      student_id: isUUID(c.studentId) ? c.studentId : null,
+      student_id: isUUID(c.studentId) ? c.studentId : toDeterministicUUID(c.studentId),
       student_name: c.studentName,
-      program_id: c.program,
-      reported_by: c.reportedBy,
+      reported_by: isUUID(c.reportedBy) ? c.reportedBy : dbId, // reporter profile fallback
       reporter_role: c.reporterRole,
       date_time: c.dateTime,
-      case_type: c.caseType,
-      priority: c.priority,
-      description: c.description,
-      initial_action_taken: c.initialActionTaken,
-      status: c.status,
-      follow_up_plan: c.followUpPlan,
-      assigned_staff: c.assignedStaff,
+      incident_at: new Date().toISOString(),
+      chronology: c.description || 'Catatan observasi perkembangan perilaku siswa.',
+      case_type: c.caseType || 'perilaku',
+      priority: c.priority || 'sedang',
+      status: c.status || 'open',
+      initial_action_taken: c.initialActionTaken || '',
+      follow_up_plan: c.followUpPlan || '',
+      assigned_staff: c.assignedStaff || '',
       resolution_notes: c.resolutionNotes || null,
-      resolved_at: c.resolvedAt || null,
-      created_at: new Date().toISOString()
+      resolved_at: c.resolvedAt || null
     };
 
     const { error } = await supabase.from('student_cases').upsert(payload, { onConflict: 'id' });
@@ -713,8 +707,7 @@ export async function saveTaskToSupabase(task: TeacherTask): Promise<string | nu
       submission_date: task.submissionDate || null,
       notes: task.notes || null,
       reviewer_notes: task.reviewerNotes || null,
-      media_count: task.mediaCount || 0,
-      created_at: new Date().toISOString()
+      media_count: task.mediaCount || 0
     };
 
     const { error } = await supabase.from('tasks').upsert(payload, { onConflict: 'id' });
@@ -757,15 +750,15 @@ export async function fetchProgramsFromSupabase(): Promise<SchoolProgramDetail[]
     return data.map((row: any) => ({
       id: row.id,
       code: row.code || row.id,
-      title: row.title || '',
-      shortDesc: row.short_desc || '',
-      schedule: row.schedule || '',
+      title: row.name || row.title || '',
+      shortDesc: row.description || '',
+      schedule: row.schedule_info || '',
       ageGroup: row.age_group || '',
-      points: Array.isArray(row.points) ? row.points : [],
+      points: Array.isArray(row.objectives) ? row.objectives : (Array.isArray(row.points) ? row.points : []),
       spesial: row.spesial || '',
-      fee: row.fee || '',
-      badgeColor: row.badge_color || 'from-blue-600 to-indigo-600',
-      iconName: row.icon_name || 'Sun'
+      fee: row.fee_display || row.fee || '',
+      badgeColor: 'from-blue-600 to-indigo-600',
+      iconName: 'Sun'
     }));
   } catch (err) {
     console.warn('fetchProgramsFromSupabase failed:', err);
@@ -780,18 +773,14 @@ export async function saveProgramToSupabase(prog: SchoolProgramDetail): Promise<
 
   try {
     const payload = {
-      id: prog.id,
+      id: isUUID(prog.id) ? prog.id : toDeterministicUUID(prog.id),
       code: prog.code,
-      title: prog.title,
-      short_desc: prog.shortDesc,
-      schedule: prog.schedule,
-      age_group: prog.ageGroup,
-      points: prog.points,
-      spesial: prog.spesial,
-      fee: prog.fee,
-      badge_color: prog.badgeColor,
-      icon_name: prog.iconName,
-      created_at: new Date().toISOString()
+      name: prog.title,
+      description: prog.shortDesc,
+      schedule_info: prog.schedule,
+      fee_display: prog.fee,
+      is_active: true,
+      updated_at: new Date().toISOString()
     };
 
     const { error } = await supabase.from('programs').upsert(payload, { onConflict: 'id' });
@@ -808,7 +797,7 @@ export async function deleteProgramFromSupabase(id: string): Promise<boolean> {
   if (!supabase || !config.isConnected) return false;
 
   try {
-    await supabase.from('programs').delete().eq('id', id);
+    await supabase.from('programs').delete().eq('id', isUUID(id) ? id : toDeterministicUUID(id));
     return true;
   } catch {
     return false;
@@ -848,8 +837,7 @@ export async function savePositionToSupabase(pos: JobPosition): Promise<string |
       id: pos.id,
       title: pos.title,
       role_category: pos.roleCategory,
-      description: pos.description || '',
-      created_at: new Date().toISOString()
+      description: pos.description || ''
     };
 
     const { error } = await supabase.from('positions').upsert(payload, { onConflict: 'id' });
@@ -882,12 +870,12 @@ export async function fetchObservationSlotsFromSupabase(): Promise<ObservationSl
   if (!supabase || !config.isConnected) return null;
 
   try {
-    const { data, error } = await supabase.from('observation_slots').select('*').order('date', { ascending: true });
+    const { data, error } = await supabase.from('observation_slots').select('*').order('created_at', { ascending: true });
     if (error || !data || data.length === 0) return null;
 
     return data.map((row: any) => ({
       id: row.id,
-      date: row.date,
+      date: row.date || (row.start_at ? row.start_at.split('T')[0] : '2026-10-30'),
       timeSlot: row.time_slot || '',
       assessorName: row.assessor_name || '',
       room: row.room || '',
@@ -913,8 +901,7 @@ export async function saveObservationSlotToSupabase(slot: ObservationSlot): Prom
       assessor_name: slot.assessorName,
       room: slot.room,
       capacity: slot.capacity,
-      booked_count: slot.bookedCount,
-      created_at: new Date().toISOString()
+      booked_count: slot.bookedCount
     };
 
     const { error } = await supabase.from('observation_slots').upsert(payload, { onConflict: 'id' });
@@ -972,8 +959,7 @@ export async function saveSDRToSupabase(studentId: string, record: Partial<Stude
       program_decision: record.programDecision || 'CONTINUE',
       decision_rationale: record.decisionRationale || '',
       principal_approval_date: record.principalApprovalDate || null,
-      planning_matrix: record.planningMatrix || [],
-      created_at: new Date().toISOString()
+      planning_matrix: record.planningMatrix || []
     };
 
     const { error } = await supabase.from('student_development_records').upsert(payload, { onConflict: 'student_id' });
@@ -1043,8 +1029,7 @@ export async function saveConsultationToSupabase(req: ConsultationRequest): Prom
       status: req.status,
       feedback_notes: req.feedbackNotes || null,
       confirmed_date: req.confirmedDate || null,
-      confirmed_time: req.confirmedTime || null,
-      created_at: req.createdAt ? new Date(req.createdAt).toISOString() : new Date().toISOString()
+      confirmed_time: req.confirmedTime || null
     };
 
     const { error } = await supabase.from('consultation_requests').upsert(payload, { onConflict: 'id' });
@@ -1064,9 +1049,9 @@ export async function fetchSiteSettingsFromSupabase(): Promise<any | null> {
   if (!supabase || !config.isConnected) return null;
 
   try {
-    const { data, error } = await supabase.from('school_settings').select('*').eq('id', 'current').maybeSingle();
-    if (error || !data || !data.settings) return null;
-    return data.settings;
+    const { data, error } = await supabase.from('school_settings').select('*').eq('setting_key', 'site_settings').maybeSingle();
+    if (error || !data || !data.setting_value) return null;
+    return data.setting_value;
   } catch (err) {
     return null;
   }
@@ -1079,8 +1064,9 @@ export async function saveSiteSettingsToSupabase(settings: any): Promise<boolean
 
   try {
     const payload = {
-      id: 'current',
-      settings,
+      id: 'a0000000-0000-4000-a000-000000000001',
+      setting_key: 'site_settings',
+      setting_value: settings,
       updated_at: new Date().toISOString()
     };
 
