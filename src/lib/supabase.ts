@@ -12,8 +12,8 @@ export interface SupabaseConfig {
 }
 
 export function getSupabaseConfig(): SupabaseConfig {
-  const envUrl = import.meta.env.VITE_SUPABASE_URL || '';
-  const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+  const envUrl = import.meta.env.VITE_SUPABASE_URL || 'https://wscfomgzlcnkjvgxwoba.supabase.co';
+  const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_ZHIAFYFJoMZi4Z4vgVjvFg_1fmC3hYb';
   
   const savedUrl = localStorage.getItem(STORAGE_KEY_URL);
   const savedKey = localStorage.getItem(STORAGE_KEY_KEY);

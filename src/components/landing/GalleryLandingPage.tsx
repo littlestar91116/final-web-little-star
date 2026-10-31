@@ -1,21 +1,21 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Play, 
-  Image as ImageIcon, 
-  Film, 
-  Filter, 
-  Plus, 
-  Trash2, 
-  Eye, 
-  EyeOff, 
-  Sparkles, 
-  Calendar, 
-  MessageCircle, 
-  LogIn, 
-  X, 
-  Upload, 
-  CheckCircle2, 
+import {
+  Play,
+  Image as ImageIcon,
+  Film,
+  Filter,
+  Plus,
+  Trash2,
+  Eye,
+  EyeOff,
+  Sparkles,
+  Calendar,
+  MessageCircle,
+  LogIn,
+  X,
+  Upload,
+  CheckCircle2,
   Crown,
   ChevronRight,
   ShieldCheck,
@@ -40,6 +40,9 @@ import { useSiteSettings } from '../../context/SiteSettingsContext';
 import { GalleryItem, ProgramType, SchoolProgramDetail } from '../../types';
 import { Logo } from '../common/Logo';
 import GlowCursor from '../common/GlowCursor';
+import DriftWall, { DriftWallItem } from '../common/DriftWall';
+import WarpText from '../common/WarpText';
+import LightTunnel from '../common/LightTunnel';
 import { AdmissionRegistrationModal } from './AdmissionRegistrationModal';
 
 export const WHATSAPP_CONSULTATION_URL = "https://wa.me/6282199988769?text=Assalamu’alaikum+warahmatullahi+wabarakatuh.+Selamat+pagi,+Mr/Mrs.+Mohon+izin+menghubungi.+Perkenalkan,+saya+[Nama].+Saya+ingin+menanyakan+informasi+terkait+[keperluan+yang+ingin+ditanyakan]+di+sekolah.+Mohon+informasi+dan+arahannya.+Terima+kasih+atas+waktu+dan+bantuannya.+Wassalamu’alaikum+warahmatullahi+wabarakatuh.";
@@ -50,7 +53,18 @@ interface GalleryLandingPageProps {
   onOpenSettings?: () => void;
 }
 
-export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({ 
+const DEFAULT_DRIFT_ITEMS: DriftWallItem[] = [
+  { image: 'https://picsum.photos/id/1015/600/400', title: 'Peaks', href: 'https://example.com/one' },
+  { image: 'https://picsum.photos/id/1025/600/400', title: 'Pup', href: 'https://example.com/two' },
+  { image: 'https://picsum.photos/id/1039/600/400', title: 'Falls', href: 'https://example.com/three' },
+  { image: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=600&auto=format&fit=crop&q=80', title: 'Sensori Clay Little Star' },
+  { image: 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=600&auto=format&fit=crop&q=80', title: 'Terapi Wicara' },
+  { image: 'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=600&auto=format&fit=crop&q=80', title: 'DayCare Ceria' },
+  { image: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=600&auto=format&fit=crop&q=80', title: 'Motorik Kasar' },
+  { image: 'https://images.unsplash.com/photo-1485546246426-74dc88dec4d9?w=600&auto=format&fit=crop&q=80', title: 'Shadow Teacher' }
+];
+
+export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
   onOpenLogin,
   onEnterDashboard,
   onOpenSettings
@@ -61,6 +75,18 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
 
   const isSuperAdmin = currentUser?.role === 'super_admin';
   const dynamicWhatsAppUrl = getWhatsAppUrl();
+
+  const [driftWallItems] = useState<DriftWallItem[]>(() => {
+    const saved = localStorage.getItem('ls_driftwall_items');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return DEFAULT_DRIFT_ITEMS;
+      }
+    }
+    return DEFAULT_DRIFT_ITEMS;
+  });
 
   // Filters
   const [selectedMediaType, setSelectedMediaType] = useState<'all' | 'image' | 'video'>('all');
@@ -94,8 +120,8 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
   };
 
   const handleOpenAdmissionWithProg = (progCode: string) => {
-    const pCode = (['sekolah_pagi', 'terapi', 'daycare', 'shadow'].includes(progCode) 
-      ? progCode 
+    const pCode = (['sekolah_pagi', 'terapi', 'daycare', 'shadow'].includes(progCode)
+      ? progCode
       : 'sekolah_pagi') as ProgramType;
     setSelectedAdmissionProg(pCode);
     setShowAdmissionModal(true);
@@ -137,8 +163,8 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
   const handleToggleTakeDown = (item: GalleryItem) => {
     toggleTakeDownGalleryItem(item.id);
     showNotification(
-      item.isPublic 
-        ? `"${item.title}" berhasil di-take down (status privat).` 
+      item.isPublic
+        ? `"${item.title}" berhasil di-take down (status privat).`
         : `"${item.title}" berhasil dipublikasikan kembali.`
     );
   };
@@ -203,15 +229,15 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
 
           {/* Quick Nav Links on Desktop / Laptop */}
           <nav className="hidden lg:flex items-center gap-4 text-xs font-bold text-slate-700">
-            <a 
-              href="#program-sekolah" 
+            <a
+              href="#program-sekolah"
               className="px-3 py-1.5 rounded-xl hover:bg-amber-100/60 hover:text-amber-900 transition-colors flex items-center gap-1.5"
             >
               <BookOpen className="w-3.5 h-3.5 text-amber-600" />
               <span>Program Sekolah</span>
             </a>
-            <a 
-              href="#galeri-sekolah" 
+            <a
+              href="#galeri-sekolah"
               className="px-3 py-1.5 rounded-xl hover:bg-blue-100/60 hover:text-blue-900 transition-colors flex items-center gap-1.5"
             >
               <Sparkles className="w-3.5 h-3.5 text-blue-600" />
@@ -291,8 +317,8 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
               exit={{ opacity: 0, height: 0 }}
               className="lg:hidden mt-2 pt-2 border-t border-amber-200/60 space-y-1.5 overflow-hidden"
             >
-              <a 
-                href="#program-sekolah" 
+              <a
+                href="#program-sekolah"
                 onClick={() => setMobileMenuOpen(false)}
                 className="px-3 py-2 rounded-xl bg-amber-50/70 hover:bg-amber-100 text-slate-800 text-xs font-bold flex items-center justify-between"
               >
@@ -302,8 +328,8 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
                 </span>
                 <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
               </a>
-              <a 
-                href="#galeri-sekolah" 
+              <a
+                href="#galeri-sekolah"
                 onClick={() => setMobileMenuOpen(false)}
                 className="px-3 py-2 rounded-xl bg-blue-50/70 hover:bg-blue-100 text-slate-800 text-xs font-bold flex items-center justify-between"
               >
@@ -313,8 +339,8 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
                 </span>
                 <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
               </a>
-              <a 
-                href={dynamicWhatsAppUrl} 
+              <a
+                href={dynamicWhatsAppUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setMobileMenuOpen(false)}
@@ -341,7 +367,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
           <span className="text-2xl animate-bounce-subtle inline-block">⭐</span>
         </div>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -351,7 +377,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
           <span>{settings.heroBadgeText || 'Dokumentasi Resmi Little Star Learning Center'}</span>
         </motion.div>
 
-        <motion.h1 
+        <motion.h1
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
@@ -360,7 +386,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
           {settings.heroTitle || 'Galeri Foto & Video Pembelajaran Inklusif'}
         </motion.h1>
 
-        <motion.p 
+        <motion.p
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
@@ -370,7 +396,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
         </motion.p>
 
         {/* Hero CTA Buttons: Online Admission & WhatsApp Consultation */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
@@ -491,7 +517,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
       {/* Super Admin Control Bar (Visible when logged in as Super Admin) */}
       {isSuperAdmin && (
         <div className="max-w-7xl mx-auto w-full px-4 lg:px-8 mb-6">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-amber-50 via-yellow-50 to-amber-100/60 border-2 border-amber-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg shadow-amber-200/50"
@@ -540,7 +566,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
       {/* Toast Notification */}
       <AnimatePresence>
         {toastMessage && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20 }}
@@ -555,7 +581,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
       {/* SECTION PROGRAM SEKOLAH DI HALAMAN AWAL (Sesuai Permintaan User: tambahkan program sekolah di halaman awal) */}
       <section id="program-sekolah" className="max-w-7xl mx-auto w-full px-4 lg:px-8 pt-4 pb-12 space-y-8">
         <div className="text-center space-y-2.5 max-w-3xl mx-auto">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -565,7 +591,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
             <span>Pendidikan & Layanan Terapi Unggulan</span>
           </motion.div>
 
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -575,7 +601,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
             Program Sekolah Little Star Learning Center
           </motion.h2>
 
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -700,11 +726,10 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
                 <button
                   key={tab.id}
                   onClick={() => setSelectedMediaType(tab.id as any)}
-                  className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1.5 whitespace-nowrap ${
-                    isActive 
-                      ? 'bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 shadow-md font-black' 
-                      : 'text-slate-600 hover:text-slate-950 hover:bg-amber-50/80'
-                  }`}
+                  className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1.5 whitespace-nowrap ${isActive
+                    ? 'bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 shadow-md font-black'
+                    : 'text-slate-600 hover:text-slate-950 hover:bg-amber-50/80'
+                    }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
                   <span>{tab.label}</span>
@@ -761,21 +786,20 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: idx * 0.05 }}
                   whileHover={{ y: -8 }}
-                  className={`group relative overflow-hidden rounded-3xl bg-white border transition-all duration-300 shadow-md hover:shadow-2xl ${
-                    item.isPublic 
-                      ? 'border-amber-200/60 hover:border-amber-400/80 hover:shadow-amber-200/50' 
-                      : 'border-rose-300/80 bg-rose-50/20'
-                  }`}
+                  className={`group relative overflow-hidden rounded-3xl bg-white border transition-all duration-300 shadow-md hover:shadow-2xl ${item.isPublic
+                    ? 'border-amber-200/60 hover:border-amber-400/80 hover:shadow-amber-200/50'
+                    : 'border-rose-300/80 bg-rose-50/20'
+                    }`}
                 >
                   {/* Media Preview Container */}
-                  <div 
+                  <div
                     onClick={() => setSelectedMediaItem(item)}
                     className="relative aspect-video w-full overflow-hidden bg-slate-900 cursor-pointer"
                   >
                     {isVideo ? (
                       <div className="relative w-full h-full flex items-center justify-center bg-slate-900 group-hover:scale-105 transition-transform duration-500">
                         {item.mediaUrl.endsWith('.mp4') ? (
-                          <video 
+                          <video
                             src={item.mediaUrl}
                             muted
                             loop
@@ -812,11 +836,10 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
                     {/* Super Admin Status Badge */}
                     {isSuperAdmin && (
                       <div className="absolute top-3 right-3">
-                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border shadow-sm ${
-                          item.isPublic 
-                            ? 'bg-emerald-500/90 text-white border-emerald-400' 
-                            : 'bg-rose-500/90 text-white border-rose-400'
-                        }`}>
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border shadow-sm ${item.isPublic
+                          ? 'bg-emerald-500/90 text-white border-emerald-400'
+                          : 'bg-rose-500/90 text-white border-rose-400'
+                          }`}>
                           {item.isPublic ? 'Tayang Publik' : 'Di-Take Down'}
                         </span>
                       </div>
@@ -835,7 +858,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
                       </span>
                     </div>
 
-                    <h3 
+                    <h3
                       onClick={() => setSelectedMediaItem(item)}
                       className="text-sm font-black text-slate-900 font-display group-hover:text-blue-700 transition-colors line-clamp-2 cursor-pointer leading-snug"
                     >
@@ -851,11 +874,10 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
                       <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                         <button
                           onClick={() => handleToggleTakeDown(item)}
-                          className={`flex-1 px-3 py-1.5 rounded-xl text-[11px] font-bold border transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
-                            item.isPublic 
-                              ? 'bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100' 
-                              : 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
-                          }`}
+                          className={`flex-1 px-3 py-1.5 rounded-xl text-[11px] font-bold border transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${item.isPublic
+                            ? 'bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100'
+                            : 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
+                            }`}
                         >
                           {item.isPublic ? (
                             <>
@@ -887,6 +909,8 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
         )}
       </main>
 
+
+
       {/* Floating Sticky WhatsApp Button (Controlled by Super Admin in Settings) */}
       {settings.showFloatingWhatsApp && (
         <div className="fixed bottom-6 right-6 z-40">
@@ -912,7 +936,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
       <AnimatePresence>
         {selectedMediaItem && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -920,7 +944,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
               className="fixed inset-0 bg-slate-950/85 backdrop-blur-md cursor-pointer"
             />
 
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
@@ -947,7 +971,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
               <div className="flex-1 bg-black flex items-center justify-center overflow-hidden">
                 {selectedMediaItem.mediaType === 'video' ? (
                   selectedMediaItem.mediaUrl.endsWith('.mp4') ? (
-                    <video 
+                    <video
                       src={selectedMediaItem.mediaUrl}
                       controls
                       autoPlay
@@ -990,7 +1014,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
       <AnimatePresence>
         {showUploadModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -998,7 +1022,7 @@ export const GalleryLandingPage: React.FC<GalleryLandingPageProps> = ({
               className="fixed inset-0 bg-slate-950/70 backdrop-blur-md cursor-pointer"
             />
 
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}

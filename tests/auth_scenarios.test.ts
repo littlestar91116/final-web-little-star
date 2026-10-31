@@ -147,7 +147,7 @@ async function runTestSuite() {
     if (userIdx < 0) throw new Error('Akun tidak ditemukan');
 
     mockAccounts[userIdx].name = newName;
-    if (currentSessionUser?.id === targetId) {
+    if (currentSessionUser && currentSessionUser.id === targetId) {
       currentSessionUser.name = newName;
     }
 
@@ -172,7 +172,7 @@ async function runTestSuite() {
     if (userIdx < 0) throw new Error('Akun tidak ditemukan');
 
     mockAccounts[userIdx].email = newEmail;
-    if (currentSessionUser?.id === targetId) {
+    if (currentSessionUser && currentSessionUser.id === targetId) {
       currentSessionUser.email = newEmail;
     }
 
