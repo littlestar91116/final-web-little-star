@@ -703,6 +703,7 @@ CREATE POLICY "Super admin can do everything on profiles"
   WITH CHECK (public.is_super_admin());
 
 -- SAMPLE INITIAL POLICIES ON STUDENTS
+DROP POLICY IF EXISTS "Parents view own children" ON students;
 CREATE POLICY "Parents view own children" ON students FOR SELECT TO authenticated USING (
   EXISTS (
     SELECT 1 FROM student_guardians sg 
