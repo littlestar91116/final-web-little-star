@@ -8,6 +8,17 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- 2. TABEL ROLES & SEED DATA
+-- Jika tabel roles lama terbuat dengan tipe id UUID, drop & buat ulang dengan tipe TEXT
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' AND table_name = 'roles' AND column_name = 'id' AND data_type = 'uuid'
+  ) THEN
+    DROP TABLE public.roles CASCADE;
+  END IF;
+END $$;
+
 CREATE TABLE IF NOT EXISTS public.roles (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
@@ -54,6 +65,13 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 -- Pastikan kolom yang mungkin belum ada di tabel profiles lama ditambahkan dengan aman
 DO $$
 BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='profiles' AND column_name='role_id' AND data_type='uuid') THEN
+    ALTER TABLE public.profiles ALTER COLUMN role_id TYPE TEXT USING role_id::text;
+    ALTER TABLE public.profiles ALTER COLUMN role_id SET DEFAULT 'wali_murid';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='profiles' AND column_name='role_id') THEN
+    ALTER TABLE public.profiles ADD COLUMN role_id TEXT REFERENCES public.roles(id) DEFAULT 'wali_murid';
+  END IF;
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='profiles' AND column_name='username') THEN
     ALTER TABLE public.profiles ADD COLUMN username TEXT UNIQUE;
   END IF;

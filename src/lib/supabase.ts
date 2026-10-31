@@ -76,6 +76,16 @@ export const SUPABASE_55_TABLES_SQL = `-- ======================================
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- 2. IDENTITAS & PEGAWAI (TABEL 1 - 10)
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' AND table_name = 'roles' AND column_name = 'id' AND data_type = 'uuid'
+  ) THEN
+    DROP TABLE public.roles CASCADE;
+  END IF;
+END $$;
+
 CREATE TABLE IF NOT EXISTS roles (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
